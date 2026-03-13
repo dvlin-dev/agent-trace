@@ -1,0 +1,21 @@
+appId: com.claude-code-debug.app
+productName: Claude Code Debug
+directories:
+  output: dist
+  buildResources: resources
+files:
+  - out/**/*
+  - node_modules/**/*
+asarUnpack:
+  - "**/node_modules/better-sqlite3/**"
+mac:
+  category: public.app-category.developer-tools
+  target:
+    - dmg
+    - zip
+win:
+  target:
+    - nsis
+linux:
+  target:
+    - AppImage
