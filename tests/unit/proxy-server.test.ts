@@ -107,7 +107,7 @@ describe("ProxyServer", () => {
     expect(captured[0].requestSize).toBeGreaterThan(0);
   });
 
-  it("preserves request path without adding prefix", async () => {
+  it("preserves request path when target url has no pathname prefix", async () => {
     mockTarget = await createMockTarget();
     const captured: RequestRecord[] = [];
 
@@ -123,6 +123,49 @@ describe("ProxyServer", () => {
     await new Promise((r) => setTimeout(r, 50));
 
     expect(captured[0].path).toBe("/v1/messages");
+  });
+
+  it("preserves target url pathname prefix when forwarding", async () => {
+    mockTarget = await createMockTarget();
+
+    proxy = createProxyServer({
+      targetUrl: `http://127.0.0.1:${mockTarget.port}/api`,
+      port: 0,
+      onRequest: () => {},
+      onError: () => {},
+    });
+
+    const { port } = await proxy.start();
+    const res = await httpRequest(
+      `http://127.0.0.1:${port}/v1/messages?beta=true`,
+      {
+        method: "POST",
+        body: JSON.stringify({ messages: [] }),
+        headers: { "content-type": "application/json" },
+      },
+    );
+
+    expect(res.statusCode).toBe(200);
+    const parsed = JSON.parse(res.body);
+    expect(parsed.path).toBe("/api/v1/messages?beta=true");
+  });
+
+  it("normalizes trailing slash on target url pathname prefix", async () => {
+    mockTarget = await createMockTarget();
+
+    proxy = createProxyServer({
+      targetUrl: `http://127.0.0.1:${mockTarget.port}/api/`,
+      port: 0,
+      onRequest: () => {},
+      onError: () => {},
+    });
+
+    const { port } = await proxy.start();
+    const res = await httpRequest(`http://127.0.0.1:${port}/v1/messages`);
+
+    expect(res.statusCode).toBe(200);
+    const parsed = JSON.parse(res.body);
+    expect(parsed.path).toBe("/api/v1/messages");
   });
 
   it("reports error on port conflict", async () => {

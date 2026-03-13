@@ -10,6 +10,19 @@ export interface ForwardOptions {
   body: Buffer;
 }
 
+function joinTargetPath(target: URL, requestPath: string): string {
+  const [rawPathname, search = ""] = requestPath.split("?");
+  const normalizedBase = target.pathname.replace(/\/+$/, "");
+  const normalizedRequestPath = rawPathname.startsWith("/")
+    ? rawPathname
+    : `/${rawPathname}`;
+  const pathname = normalizedBase
+    ? `${normalizedBase}${normalizedRequestPath}`
+    : normalizedRequestPath;
+
+  return search ? `${pathname}?${search}` : pathname;
+}
+
 export function forwardRequest(
   options: ForwardOptions,
 ): Promise<http.IncomingMessage> {
@@ -21,7 +34,7 @@ export function forwardRequest(
     const reqOptions: http.RequestOptions = {
       hostname: target.hostname,
       port: target.port || (isHttps ? 443 : 80),
-      path: options.path,
+      path: joinTargetPath(target, options.path),
       method: options.method,
       headers: {
         ...options.headers,

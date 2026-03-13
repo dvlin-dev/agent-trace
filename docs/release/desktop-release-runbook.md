@@ -247,7 +247,24 @@
 2. 设置页可以手动检查、下载和安装
 3. 左下角 toast 会在有新版本、下载完成、更新失败时提示
 
-## 7. 最终你只需要达成的结果
+## 7. TARGET_URL 拼接规则
+
+代理转发时，`TARGET_URL` 会被当成完整 base URL 使用：
+
+- 会保留用户填写的 pathname
+- 会把 Claude Code 发来的原始请求路径继续拼接到后面
+- 会自动处理是否带尾 `/`
+
+例如：
+
+- `TARGET_URL = http://c.c.wegic.top:3000/api`
+- 请求路径 = `/v1/messages?beta=true`
+
+最终会转发到：
+
+- `http://c.c.wegic.top:3000/api/v1/messages?beta=true`
+
+## 8. 最终你只需要达成的结果
 
 完成后，发布流程应该是：
 
@@ -257,7 +274,7 @@
 4. 在 GitHub Releases 里拿到 `.dmg`、`.zip`、`latest-mac.yml` 和 blockmap
 5. 客户端能检测、下载并安装新版本
 
-## 8. 参考文件
+## 9. 参考文件
 
 当前项目：
 
