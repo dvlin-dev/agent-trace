@@ -37,6 +37,8 @@ Claude Code  ──▶  Proxy (localhost:8888)  ──▶  Anthropic API
 
 **Storage** — All captured data is persisted to a local SQLite database (`~/Library/Application Support/agent-trace/history.db`). Auto-prunes after 2000 requests.
 
+**Upgrade Compatibility** — Existing installs keep the original Electron `appId` for in-place upgrades. On first launch after the rename, Agent Trace copies local settings and history from the legacy `claude-code-debug` user-data folder when needed.
+
 **UI** — Electron + React app with a ChatGPT-style conversation view. Left sidebar shows sessions, right side shows the rendered conversation with an optional Inspector panel for raw request/response data.
 
 ## Setup

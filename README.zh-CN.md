@@ -37,6 +37,8 @@ Claude Code  ──▶  代理 (localhost:8888)  ──▶  Anthropic API
 
 **存储** —— 所有捕获的数据持久化到本地 SQLite 数据库（`~/Library/Application Support/agent-trace/history.db`）。超过 2000 条请求自动清理最旧的记录。
 
+**升级兼容** —— 现有安装会继续沿用原来的 Electron `appId`，保证原地升级不被打断。应用改名后的首次启动会在需要时把旧 `claude-code-debug` 目录里的本地设置和历史记录迁移到新的数据目录。
+
 **UI** —— Electron + React 应用，采用类 ChatGPT 的对话视图。左侧边栏显示会话列表，右侧显示渲染后的对话流，可选的 Inspector 面板查看原始请求/响应数据。
 
 ## 安装使用

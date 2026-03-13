@@ -60,7 +60,8 @@ src/
 │   ├── store/
 │   │   ├── database.ts             # SQLite init + schema
 │   │   ├── history-store.ts        # Request/session CRUD
-│   │   └── settings-store.ts       # JSON settings read/write
+│   │   ├── settings-store.ts       # JSON settings read/write
+│   │   └── user-data-migration.ts  # Copy legacy settings/history into new data dir
 │   └── ipc/
 │       └── register-ipc.ts         # All IPC handler registration
 │
@@ -199,6 +200,10 @@ CREATE INDEX idx_sessions_updated   ON sessions(updated_at DESC);
 ```
 
 Storage: `~/Library/Application Support/agent-trace/history.db` (macOS)
+
+Upgrade compatibility:
+- Keep legacy Electron `appId` so packaged installs continue to upgrade in place
+- Migrate `~/Library/Application Support/claude-code-debug/*` into `agent-trace` on first launch when target files are missing
 
 ## UI Layout
 
