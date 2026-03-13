@@ -61,7 +61,7 @@ describe("macOS release config", () => {
       "APPLE_API_KEY_CONTENT: ${{ secrets.APPLE_API_KEY }}",
     );
     expect(workflow).toContain(
-      "pnpm exec node ./scripts/run-electron-builder.cjs --mac dmg zip --arm64",
+      "pnpm exec node ./scripts/run-electron-builder.cjs --mac dmg zip --arm64 --publish never",
     );
     expect(workflow).toContain("uses: softprops/action-gh-release@v2");
   });

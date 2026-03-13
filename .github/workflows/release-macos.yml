@@ -52,7 +52,7 @@ jobs:
       - name: Build app
         run: pnpm build
       - name: Build macOS release artifacts
-        run: pnpm exec node ./scripts/run-electron-builder.cjs --mac dmg zip --arm64
+        run: pnpm exec node ./scripts/run-electron-builder.cjs --mac dmg zip --arm64 --publish never
       - name: Publish GitHub release
         uses: softprops/action-gh-release@v2
         with:
