@@ -30,7 +30,9 @@ describe("macOS release config", () => {
     const config = await read("electron-builder.yml");
 
     expect(config).toContain("icon: resources/icon.icns");
-    expect(config).toContain("artifactName: ${productName}-${version}-${arch}.${ext}");
+    expect(config).toContain(
+      "artifactName: Claude-Code-Debug-${version}-${arch}.${ext}",
+    );
     expect(config).toContain("hardenedRuntime: true");
     expect(config).toContain("gatekeeperAssess: false");
     expect(config).toContain("entitlements: build/entitlements.mac.plist");

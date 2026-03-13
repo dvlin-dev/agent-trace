@@ -10,7 +10,7 @@ asarUnpack:
   - "**/node_modules/better-sqlite3/**"
 mac:
   icon: resources/icon.icns
-  artifactName: ${productName}-${version}-${arch}.${ext}
+  artifactName: Claude-Code-Debug-${version}-${arch}.${ext}
   category: public.app-category.developer-tools
   hardenedRuntime: true
   gatekeeperAssess: false
@@ -25,7 +25,7 @@ win:
 linux:
   target:
     - AppImage
-artifactName: ${productName}-${version}-${arch}.${ext}
+artifactName: Claude-Code-Debug-${version}-${arch}.${ext}
 publish:
   provider: github
   owner: dvlin-dev
