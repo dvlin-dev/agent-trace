@@ -82,11 +82,6 @@ export function ContentBlock({ block }: ContentBlockProps) {
             {JSON.stringify(block.input, null, 2)}
           </pre>
         )}
-        {block.callId && (
-          <div className="mt-1 text-[9px] font-mono text-muted-foreground/50 truncate">
-            {block.callId}
-          </div>
-        )}
       </div>
     );
   }
