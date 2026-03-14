@@ -22,7 +22,6 @@ export function buildInspectorDocument(
       title: "Overview",
       items: [
         { label: "Provider", value: formatProviderLabel(exchange.providerId) },
-        { label: "Profile", value: exchange.profileId },
         { label: "Path", value: exchange.path },
         { label: "Model", value: normalized.model ?? "unknown" },
         { label: "Status", value: String(exchange.statusCode ?? "unknown") },
