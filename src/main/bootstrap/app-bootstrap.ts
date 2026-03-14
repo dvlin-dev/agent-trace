@@ -67,6 +67,30 @@ async function readRequestBody(request: http.IncomingMessage): Promise<Buffer> {
   return Buffer.concat(chunks);
 }
 
+// HTTP hop-by-hop headers that MUST NOT be forwarded by a proxy.
+const HOP_BY_HOP_HEADERS = new Set([
+  "connection",
+  "keep-alive",
+  "proxy-authenticate",
+  "proxy-authorization",
+  "te",
+  "trailers",
+  "transfer-encoding",
+  "upgrade",
+]);
+
+function stripHopByHopHeaders(
+  headers: Record<string, string | string[] | undefined>,
+): Record<string, string | string[] | undefined> {
+  const result: Record<string, string | string[] | undefined> = {};
+  for (const [key, value] of Object.entries(headers)) {
+    if (!HOP_BY_HOP_HEADERS.has(key.toLowerCase())) {
+      result[key] = value;
+    }
+  }
+  return result;
+}
+
 function buildCapturedBody(
   bytes: Buffer,
   headers: Record<string, string>,
@@ -153,8 +177,16 @@ export function createAppBootstrap(
             signal: abortController.signal,
           });
 
-          response.writeHead(forwarded.statusCode, forwarded.headers);
+          response.writeHead(
+            forwarded.statusCode,
+            stripHopByHopHeaders(forwarded.headers),
+          );
           forwarded.response.pipe(response);
+          forwarded.response.on("error", () => {
+            if (!response.writableEnded) {
+              response.end();
+            }
+          });
 
           const requestHeaders = normalizeHeaders(request.headers);
           const responseHeaders = normalizeHeaders(forwarded.headers);
@@ -195,6 +227,8 @@ export function createAppBootstrap(
           if (!response.headersSent && !response.writableEnded) {
             response.writeHead(502, { "content-type": "text/plain" });
             response.end(`Proxy error: ${message}`);
+          } else if (!response.writableEnded) {
+            response.end();
           }
         }
       },
