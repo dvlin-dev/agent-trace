@@ -107,10 +107,7 @@ describe("update ui", () => {
 
     expect(screen.getByText("Version 0.1.2")).toBeInTheDocument();
     expect(
-      screen.getByText(/1 provider profiles are configured/i),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: /check for updates/i }),
+      screen.getByRole("button", { name: /check/i }),
     ).toBeInTheDocument();
   });
 
@@ -127,7 +124,7 @@ describe("update ui", () => {
     } as never);
 
     render(<SettingsDialog open onOpenChange={() => {}} />);
-    fireEvent.click(screen.getByRole("button", { name: /download update/i }));
+    fireEvent.click(screen.getByRole("button", { name: /download/i }));
 
     await waitFor(() => {
       expect(downloadUpdate).toHaveBeenCalledTimes(1);
@@ -147,7 +144,7 @@ describe("update ui", () => {
     } as never);
 
     render(<SettingsDialog open onOpenChange={() => {}} />);
-    fireEvent.click(screen.getByRole("button", { name: /restart to install/i }));
+    fireEvent.click(screen.getByRole("button", { name: /restart/i }));
 
     await waitFor(() => {
       expect(quitAndInstallUpdate).toHaveBeenCalledTimes(1);

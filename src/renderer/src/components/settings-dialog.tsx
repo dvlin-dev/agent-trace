@@ -23,131 +23,127 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
     downloadUpdate,
     quitAndInstallUpdate,
   } = useAppStore();
-  const { profiles, statuses, initialized, initialize, startProfile, stopProfile } = useProfileStore();
+  const { profiles, statuses, initialized, initialize, startProfile, stopProfile } =
+    useProfileStore();
 
   useEffect(() => {
-    if (!open || initialized) {
-      return;
-    }
+    if (!open || initialized) return;
     void initialize();
   }, [initialize, initialized, open]);
 
-  const renderUpdateAction = () => {
+  const updateButton = (() => {
     switch (updateState.status) {
       case "available":
-        return (
-          <Button onClick={() => void downloadUpdate()} className="w-full">
-            Download update
-          </Button>
-        );
+        return <Button size="xs" onClick={() => void downloadUpdate()}>Download</Button>;
       case "downloaded":
-        return (
-          <Button onClick={() => void quitAndInstallUpdate()} className="w-full">
-            Restart to install
-          </Button>
-        );
+        return <Button size="xs" onClick={() => void quitAndInstallUpdate()}>Restart</Button>;
       case "downloading":
-        return (
-          <Button disabled className="w-full">
-            Downloading {Math.round(updateState.downloadPercent ?? 0)}%
-          </Button>
-        );
+        return <Button size="xs" disabled>Downloading {Math.round(updateState.downloadPercent ?? 0)}%</Button>;
       default:
-        return (
-          <Button onClick={() => void checkForUpdates()} className="w-full">
-            Check for updates
-          </Button>
-        );
+        return <Button variant="outline" size="xs" onClick={() => void checkForUpdates()}>Check</Button>;
     }
-  };
+  })();
 
   const statusMessage = (() => {
     switch (updateState.status) {
-      case "checking":
-        return "Checking for updates...";
-      case "available":
-        return `Version ${updateState.availableVersion} is available to download.`;
-      case "not-available":
-        return "You are on the latest version.";
-      case "downloading":
-        return `Downloading version ${updateState.availableVersion}...`;
-      case "downloaded":
-        return `Version ${updateState.availableVersion} is ready to install.`;
-      case "error":
-        return updateState.message ?? "Update operation failed.";
-      default:
-        return updateState.message ?? "Automatic updates are ready.";
+      case "checking": return "Checking…";
+      case "available": return `v${updateState.availableVersion} available`;
+      case "not-available": return "Latest version";
+      case "downloading": return `Downloading v${updateState.availableVersion}…`;
+      case "downloaded": return `v${updateState.availableVersion} ready`;
+      case "error": return updateState.message ?? "Update failed";
+      default: return "";
     }
   })();
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Settings</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4">
-          <div className="space-y-3 border p-4">
-            <div className="space-y-1">
-              <div className="font-medium text-sm">Profile management</div>
-              <p className="text-muted-foreground text-sm">
-                {profiles.length > 0
-                  ? `${profiles.length} provider profiles are configured.`
-                  : "No provider profiles have been configured yet."}
-              </p>
+
+        <div className="space-y-5">
+          {/* Profiles Section */}
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+              Profiles
             </div>
-            {profiles.length > 0 && (
-              <div className="space-y-2">
-                {profiles.map((profile) => (
+            <div className="space-y-1">
+              {profiles.map((profile) => {
+                const isRunning = statuses[profile.id]?.isRunning ?? false;
+                return (
                   <div
                     key={profile.id}
-                    className="flex items-center gap-2 p-2 border border-border"
+                    className="flex items-center gap-2 border border-border p-2"
                   >
-                    <div className={cn("h-2 w-2 rounded-full flex-shrink-0",
-                      statuses[profile.id]?.isRunning ? "bg-emerald-500" : "bg-muted-foreground/30"
-                    )} />
+                    <div
+                      className={cn(
+                        "h-1.5 w-1.5 rounded-full flex-shrink-0",
+                        isRunning ? "bg-emerald-500" : "bg-muted-foreground/30",
+                      )}
+                    />
                     <div className="flex-1 min-w-0">
-                      <div className="text-sm font-medium">{profile.name}</div>
-                      <div className="text-xs text-muted-foreground">{profile.upstreamBaseUrl}</div>
+                      <div className="text-xs font-medium">{profile.name}</div>
+                      <div className="text-[10px] text-muted-foreground font-mono truncate">
+                        {profile.upstreamBaseUrl}
+                      </div>
                     </div>
-                    <span className="text-xs font-mono text-muted-foreground">:{profile.localPort}</span>
+                    <span className="text-[10px] font-mono text-muted-foreground flex-shrink-0">
+                      :{profile.localPort}
+                    </span>
                     <Button
-                      variant="ghost"
+                      variant={isRunning ? "destructive" : "outline"}
                       size="xs"
                       onClick={async () => {
                         try {
-                          if (statuses[profile.id]?.isRunning) {
+                          if (isRunning) {
                             await stopProfile(profile.id);
                           } else {
                             await startProfile(profile.id);
                           }
                         } catch (error) {
                           toast.error("Profile Error", {
-                            description: error instanceof Error ? error.message : String(error),
+                            description:
+                              error instanceof Error ? error.message : String(error),
                           });
                         }
                       }}
                     >
-                      {statuses[profile.id]?.isRunning ? "Stop" : "Start"}
+                      {isRunning ? "Stop" : "Start"}
                     </Button>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
-          <div className="space-y-3 border p-4">
-            <div className="space-y-1">
-              <div className="font-medium text-sm">Automatic updates</div>
-              <div className="text-muted-foreground text-sm">
-                {`Version ${updateState.currentVersion || "unknown"}`}
-              </div>
-              <p className="text-muted-foreground text-sm">{statusMessage}</p>
+                );
+              })}
             </div>
-            {renderUpdateAction()}
+            {profiles.length === 0 && (
+              <p className="text-xs text-muted-foreground">No profiles configured.</p>
+            )}
+            <button
+              className="text-xs text-primary hover:underline mt-2"
+              onClick={() => onOpenChange(false)}
+            >
+              ＋ Add Profile
+            </button>
           </div>
-          <Button onClick={() => onOpenChange(false)} className="w-full">
-            Close
-          </Button>
+
+          {/* Updates Section */}
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+              Updates
+            </div>
+            <div className="flex items-center gap-3 border border-border p-2.5">
+              <div className="flex-1">
+                <div className="text-xs font-medium">
+                  Version {updateState.currentVersion || "unknown"}
+                </div>
+                {statusMessage && (
+                  <div className="text-[10px] text-muted-foreground">{statusMessage}</div>
+                )}
+              </div>
+              {updateButton}
+            </div>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
