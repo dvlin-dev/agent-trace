@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Check, Copy } from "lucide-react";
 import type { ConnectionProfile, ProviderId } from "../../../../shared/contracts";
 import { DEFAULT_PROFILE_PORT_START } from "../../../../shared/defaults";
+import { useProfileStore } from "../../stores/profile-store";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
@@ -52,6 +53,11 @@ export function ProfileForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [copied, setCopied] = useState(false);
 
+  const profiles = useProfileStore((s) => s.profiles);
+  const portConflict = profiles.some(
+    (p) => p.localPort === localPort && p.id !== initialProfile?.id,
+  );
+
   const localAddress = `http://127.0.0.1:${localPort}`;
 
   function copyAddress() {
@@ -86,7 +92,7 @@ export function ProfileForm({
         upstreamBaseUrl: upstreamBaseUrl.trim(),
         localPort,
         enabled: initialProfile?.enabled ?? true,
-        autoStart: initialProfile?.autoStart ?? false,
+        autoStart: initialProfile?.autoStart ?? true,
       });
     } finally {
       setIsSubmitting(false);
@@ -158,12 +164,15 @@ export function ProfileForm({
             {copied ? "Copied" : "Copy"}
           </Button>
         </div>
+        {portConflict && (
+          <p className="text-xs text-destructive mt-1">Port {localPort} is already used by another profile.</p>
+        )}
       </div>
 
       <Button
         type="submit"
         className="w-full"
-        disabled={!name.trim() || !upstreamBaseUrl.trim() || isSubmitting}
+        disabled={!name.trim() || !upstreamBaseUrl.trim() || portConflict || isSubmitting}
       >
         {isSubmitting ? "Saving..." : submitLabel}
       </Button>

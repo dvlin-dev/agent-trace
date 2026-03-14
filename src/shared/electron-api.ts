@@ -11,6 +11,7 @@ import type {
 import type { UpdateState } from "./update";
 
 export interface ElectronAPI {
+  openExternal(url: string): Promise<void>;
   getProfiles(): Promise<ConnectionProfile[]>;
   saveProfiles(input: ConnectionProfile[]): Promise<ConnectionProfile[]>;
   startProfile(profileId: string): Promise<void>;

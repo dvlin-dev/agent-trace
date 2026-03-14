@@ -198,7 +198,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
               <div className="space-y-1.5">
                 <button
                   className="flex items-center gap-2 w-full text-left border border-border p-2.5 hover:bg-muted/50 transition-colors"
-                  onClick={() => window.open("https://github.com/dvlin-dev/agent-trace", "_blank")}
+                  onClick={() => void window.electronAPI.openExternal("https://github.com/dvlin-dev/agent-trace")}
                 >
                   <Github className="h-4 w-4 shrink-0" />
                   <div className="flex-1 min-w-0">
@@ -209,7 +209,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                 </button>
                 <button
                   className="flex items-center gap-2 w-full text-left border border-accent-brand/30 bg-accent-brand-muted p-2.5 hover:bg-accent-brand/15 transition-colors"
-                  onClick={() => window.open("https://moryflow.com", "_blank")}
+                  onClick={() => void window.electronAPI.openExternal("https://moryflow.com")}
                 >
                   <Sparkles className="h-4 w-4 shrink-0 text-accent-brand" />
                   <div className="flex-1 min-w-0">
