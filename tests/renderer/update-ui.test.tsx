@@ -151,20 +151,11 @@ describe("update ui", () => {
     });
   });
 
-  it("emits toast notifications for available, downloaded and error states", async () => {
+  it("emits toast notifications for downloaded and error states", async () => {
     render(<UpdateToastListener />);
 
-    act(() => {
-      useAppStore.getState().setUpdateState({
-        status: "available",
-        currentVersion: "0.1.2",
-        availableVersion: "0.1.3",
-        downloadPercent: null,
-        message: null,
-        checkedAt: "2026-03-13T10:00:00.000Z",
-      });
-    });
-
+    // With autoDownload, "available" is skipped — no toast for it.
+    // Only "downloaded" and "error" produce toasts.
     act(() => {
       useAppStore.getState().setUpdateState({
         status: "downloaded",
@@ -188,10 +179,6 @@ describe("update ui", () => {
     });
 
     await waitFor(() => {
-      expect(toastInfo).toHaveBeenCalledWith(
-        expect.stringContaining("0.1.3"),
-        expect.any(Object),
-      );
       expect(toastSuccess).toHaveBeenCalledWith(
         expect.stringContaining("0.1.3"),
         expect.any(Object),

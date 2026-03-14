@@ -253,7 +253,9 @@ function parseUsage(value: unknown): NormalizedUsage | null {
     reasoningTokens:
       typeof outputDetails?.reasoning_tokens === "number"
         ? outputDetails.reasoning_tokens
-        : null,
+        : typeof usage.reasoning_tokens === "number"
+          ? usage.reasoning_tokens
+          : null,
   };
 }
 

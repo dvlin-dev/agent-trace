@@ -69,7 +69,7 @@ export function registerIpcHandlers(deps: IpcDependencies): () => void {
       }
 
       const wasRunning = previousStatuses[profile.id]?.isRunning === true;
-      if (wasRunning || profile.autoStart) {
+      if (wasRunning) {
         await deps.proxyManager.startProfile(profile.id);
       }
     }

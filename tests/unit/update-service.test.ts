@@ -142,8 +142,8 @@ describe("createUpdateService", () => {
       }),
     );
 
-    await expect(service.checkForUpdates()).rejects.toThrow(
-      "Automatic updates are only enabled for packaged macOS builds.",
-    );
+    // Silently returns current state instead of throwing
+    const result = await service.checkForUpdates();
+    expect(result.status).toBe("idle");
   });
 });

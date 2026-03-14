@@ -47,8 +47,13 @@ describe("classifyTextBlock", () => {
   });
 
   it("classifies hook-prefixed lines as hook-output", () => {
-    const result = classifyTextBlock("hook executed successfully");
+    const result = classifyTextBlock("hook success: pre-commit passed");
     expect(result).toEqual({ injected: true, contextType: "hook-output" });
+  });
+
+  it("does not classify generic hook text as injected", () => {
+    const result = classifyTextBlock("hook dependencies keep changing");
+    expect(result).toEqual({ injected: false, contextType: null });
   });
 
   it("classifies <command-name> as command-context", () => {

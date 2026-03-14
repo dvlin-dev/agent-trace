@@ -6,7 +6,7 @@
 /** Inline noise patterns — lines that are hook/system output, not user content. */
 export const NOISE_PATTERNS = [
   /^SessionStart:/i,
-  /^hook\s/i,
+  /^hook\s+(?:success|error|failure|output|result)/i,
   /^startup\s+hook\s/i,
   /^\[.*hook.*\]/i,
   /^<command-name>/i,
@@ -50,7 +50,7 @@ export const SUGGESTION_MODE_RE = /^\[SUGGESTION MODE[:\]]/i;
 /** Inline patterns for hook-related output (not wrapped in XML). */
 export const HOOK_INLINE_RES = [
   /^SessionStart:/i,
-  /^hook\s/i,
+  /^hook\s+(?:success|error|failure|output|result)/i,
   /^startup\s+hook\s/i,
   /^<command-name>/i,
   /^<local-command/i,
