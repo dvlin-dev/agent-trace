@@ -8,7 +8,6 @@ import { StatusBar } from "../components/status-bar";
 import { SessionSidebar } from "../components/session-sidebar";
 import { MainContent } from "../components/main-content";
 import { SettingsDialog } from "../components/settings-dialog";
-import { CommandPalette } from "../components/command-palette";
 import { useProxyEvents } from "../hooks/use-proxy-events";
 
 export function WorkspacePage() {
@@ -31,7 +30,6 @@ export function WorkspacePage() {
         </ResizablePanelGroup>
       </div>
       <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
-      <CommandPalette />
     </div>
   );
 }

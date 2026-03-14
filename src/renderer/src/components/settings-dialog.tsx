@@ -8,9 +8,11 @@ import {
 import { Button } from "./ui/button";
 import { useAppStore } from "../stores/app-store";
 import { useProfileStore } from "../stores/profile-store";
+import { useSessionStore } from "../stores/session-store";
 import { ProfileForm } from "../features/profiles/profile-form";
 import { cn } from "../lib/utils";
 import { toast } from "sonner";
+import { Github, ExternalLink, Trash2, Sparkles } from "lucide-react";
 
 interface SettingsDialogProps {
   open: boolean;
@@ -26,6 +28,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
   } = useAppStore();
   const { profiles, statuses, initialized, initialize, startProfile, stopProfile, upsertProfile } =
     useProfileStore();
+  const clearHistory = useSessionStore((s) => s.clearHistory);
   const [showAddForm, setShowAddForm] = useState(false);
 
   useEffect(() => {
@@ -146,7 +149,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                 className="text-xs text-primary hover:underline mt-2"
                 onClick={() => setShowAddForm(true)}
               >
-                ＋ Add Profile
+                + Add Profile
               </button>
             </div>
 
@@ -165,6 +168,56 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                   )}
                 </div>
                 {updateButton}
+              </div>
+            </div>
+
+            {/* Data Section */}
+            <div>
+              <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                Data
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5 text-destructive hover:text-destructive"
+                onClick={async () => {
+                  await clearHistory();
+                  toast.success("History cleared");
+                }}
+              >
+                <Trash2 className="h-3 w-3" />
+                Clear all history
+              </Button>
+            </div>
+
+            {/* Links Section */}
+            <div>
+              <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                Links
+              </div>
+              <div className="space-y-1.5">
+                <button
+                  className="flex items-center gap-2 w-full text-left border border-border p-2.5 hover:bg-muted/50 transition-colors"
+                  onClick={() => window.open("https://github.com/dvlin-dev/agent-trace", "_blank")}
+                >
+                  <Github className="h-4 w-4 shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs font-medium">Agent Trace</div>
+                    <div className="text-[11px] text-muted-foreground">Star us on GitHub</div>
+                  </div>
+                  <ExternalLink className="h-3 w-3 text-muted-foreground shrink-0" />
+                </button>
+                <button
+                  className="flex items-center gap-2 w-full text-left border border-accent-brand/30 bg-accent-brand-muted p-2.5 hover:bg-accent-brand/15 transition-colors"
+                  onClick={() => window.open("https://moryflow.com", "_blank")}
+                >
+                  <Sparkles className="h-4 w-4 shrink-0 text-accent-brand" />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs font-medium">Moryflow</div>
+                    <div className="text-[11px] text-muted-foreground">Local-first AI Agent Workspace</div>
+                  </div>
+                  <ExternalLink className="h-3 w-3 text-accent-brand shrink-0" />
+                </button>
               </div>
             </div>
           </div>

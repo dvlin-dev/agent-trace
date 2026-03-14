@@ -1,140 +1,117 @@
+<div align="center">
+
+<img src="resources/icon.svg" width="120" height="120" alt="Agent Trace" />
+
 # Agent Trace
 
-[中文](./README.zh-CN.md)
+**Capture, inspect, and debug AI agent traffic in real time.**
 
-A desktop app that captures and inspects agent traffic from multiple providers. The current runtime is profile-based: each profile binds one provider, one upstream base URL, and one local listener port.
+Electron desktop app that sits between your agent client and the upstream provider,
+capturing every request/response as structured, searchable session traces.
 
-## What It Does
+[![GitHub Stars](https://img.shields.io/github/stars/dvlin-dev/agent-trace?style=flat)](https://github.com/dvlin-dev/agent-trace)
+[![Release](https://img.shields.io/github/v/release/dvlin-dev/agent-trace?style=flat)](https://github.com/dvlin-dev/agent-trace/releases)
+[![License](https://img.shields.io/github/license/dvlin-dev/agent-trace?style=flat)](LICENSE)
 
-Agent Trace runs a local listener in front of agent tooling such as Claude Code and Codex. Requests are forwarded upstream, normalized in the main process, grouped into sessions, persisted to SQLite, and rendered as provider-aware traces in the renderer.
+[English](./README.md) | [中文](./README.zh-CN.md)
 
-```text
-Agent Client  ──▶  Profile Listener (localhost:8888/8889/...)  ──▶  Upstream Provider
-                               │
-                         Capture + Normalize
-                               │
-                      SQLite + Query Services
-                               │
-                         Electron Renderer
-```
+</div>
 
-## What Data You Can See
+---
 
-| Data | Source | How It's Captured |
-|------|--------|-------------------|
-| **Instructions** | Normalized request blocks | System or developer guidance extracted by the provider adapter |
-| **Messages** | Normalized request/response messages | User turns, assistant turns, reasoning blocks, tool calls, tool results |
-| **Tools** | Request body | Registered tools and JSON Schemas |
-| **Headers** | Raw request headers | Provider-specific routing and session hints |
-| **Usage** | Response terminal events | Token accounting when the provider exposes it |
-| **Timing & Sizes** | Listener + forwarder | Duration, request size, response size |
-| **Raw Payloads** | Stored raw request/response body | Inspector tabs for debugging protocol details |
+<div align="center">
+<table><tr><td align="center" width="600">
+
+**Try [Moryflow](https://moryflow.com)** — Local-first AI Agent Workspace.
+AI agents that work with your knowledge, notes, and files.
+
+[![Moryflow](https://img.shields.io/badge/moryflow.com-Visit-E2822B?style=for-the-badge)](https://moryflow.com)
+
+</td></tr></table>
+</div>
+
+---
+
+## Features
+
+- **Multi-provider** — Supports Claude Code (Anthropic Messages API) and Codex CLI (OpenAI Responses API) side by side
+- **Session grouping** — Automatic session detection via provider-specific matchers (metadata hints, message superset, conversation IDs)
+- **Structured timeline** — Normalized conversation view with user/assistant turns, tool calls, tool results, reasoning blocks
+- **Context detection** — Injected context (system reminders, CLAUDE.md, hooks, skills) collapsed into labeled chips
+- **Inspector panel** — Per-exchange overview, token usage, tool schemas, raw request/response payloads
+- **Profile system** — Create multiple profiles with different providers and ports, start/stop independently
+- **Local-only** — All data stays on your machine in SQLite, no cloud dependency
 
 ## How It Works
 
-**Profiles** — A profile defines `providerId`, `upstreamBaseUrl`, `localPort`, and startup behavior. Multiple profiles can run side-by-side.
-
-**Transport Layer** — The main process owns local listeners and forwarding. Each listener captures one full exchange as raw request/response data.
-
-**Protocol Adapters** — Provider-specific parsing happens only in the main process. Adapters normalize raw exchanges, build inspector documents, match sessions, and assemble timelines.
-
-**Storage + Query** — Raw exchanges, normalized exchanges, and inspector documents are stored in SQLite. Query services return view models to the renderer rather than raw rows.
-
-**UI** — Renderer never parses provider bodies. It only consumes `SessionListItemVM`, `SessionTraceVM`, and `ExchangeDetailVM`.
-
-## Supported Providers
-
-- `anthropic`
-  - upstream default: `https://api.anthropic.com`
-  - protocol adapter: `anthropic-messages`
-- `codex`
-  - upstream default: `https://chatgpt.com/backend-api/codex`
-  - protocol adapter: `openai-responses`
-  - current listener flow captures the HTTP fallback path after Codex probes `/responses` over WebSocket
-
-## Setup
-
-```bash
-# Install
-pnpm install
-
-# Run in dev mode
-pnpm dev
-
-# Build for production
-pnpm build
-
-# Build a local macOS package
-pnpm dist:mac
+```
+Agent Client  ──▶  Agent Trace (localhost:8888)  ──▶  Upstream API
+                          │
+                    Capture + Normalize
+                          │
+                   SQLite + Inspector
+                          │
+                     Electron UI
 ```
 
-Create a profile in the app, start its listener, then point the client at the listener address.
+1. Create a profile — pick a provider, set the upstream URL and local port
+2. Start listening — Agent Trace opens a local HTTP proxy
+3. Point your client — set `ANTHROPIC_BASE_URL` or `OPENAI_BASE_URL` to the local address
+4. Inspect — sessions appear in real time with full structured traces
 
-Example: Anthropic profile on `127.0.0.1:8888`
+## Quick Start
 
 ```bash
+# Anthropic (Claude Code)
 export ANTHROPIC_BASE_URL=http://127.0.0.1:8888
-```
 
-Example: Codex profile on `127.0.0.1:8889`
-
-```bash
+# OpenAI (Codex CLI)
 export OPENAI_BASE_URL=http://127.0.0.1:8889
 ```
 
-Then run the client normally. Captured sessions will appear in the app under the matching provider/profile.
+## Supported Providers
 
-## macOS Release
+| Provider | Protocol Adapter | Default Upstream |
+|----------|-----------------|------------------|
+| Claude Code | `anthropic-messages` | `https://api.anthropic.com` |
+| Codex CLI | `openai-responses` | `https://chatgpt.com/backend-api/codex` |
 
-This project currently supports one release path only:
+## Architecture
 
-- build macOS artifacts
-- sign and notarize in GitHub Actions
-- publish directly to GitHub Releases
-
-### Local release command
-
-```bash
-./scripts/release.sh 0.1.0
+```
+src/
+├── main/                    # Electron main process
+│   ├── transport/           # HTTP listener + forwarder (protocol-unaware)
+│   ├── providers/           # Provider definitions + protocol adapters
+│   │   └── protocol-adapters/
+│   │       ├── anthropic-messages/   # Normalize, inspect, match, timeline
+│   │       └── openai-responses/     # Same structure for Codex
+│   ├── pipeline/            # Capture pipeline + session resolver
+│   ├── storage/             # SQLite repositories
+│   └── queries/             # View model query services
+├── preload/                 # Electron preload bridge (CJS)
+├── renderer/                # React UI (Vite ESM)
+│   ├── components/          # UI components (shadcn/ui based)
+│   ├── stores/              # Zustand state management
+│   └── hooks/               # Push event handlers
+└── shared/                  # Cross-layer contracts + types
 ```
 
-The script will:
+## Development
 
-1. verify the working tree is clean
-2. run `pnpm build`
-3. run the release config test
-4. bump `package.json` version
-5. create a release commit
-6. create tag `v<version>`
-7. push the branch and tag
-
-Pushing a tag like `v0.1.0` triggers the workflow:
-
-- `.github/workflows/release-macos.yml`
-
-That workflow builds the macOS `arm64` release, signs and notarizes it when secrets are present, and uploads `.dmg` and `.zip` assets to GitHub Releases.
-
-### Required GitHub Actions secrets
-
-Open the GitHub repository and go to:
-
-`Settings` -> `Secrets and variables` -> `Actions` -> `New repository secret`
-
-Add these repository secrets:
-
-- `CSC_LINK`
-  - base64 content of your exported Developer ID Application `.p12`
-- `CSC_KEY_PASSWORD`
-  - password for that `.p12`
-- `APPLE_API_KEY`
-  - App Store Connect API key `.p8` content, either raw PEM or base64
-- `APPLE_API_KEY_ID`
-  - App Store Connect key ID
-- `APPLE_API_ISSUER`
-  - App Store Connect issuer ID
-
-Without these secrets, local packaging still works, but notarization is skipped and GitHub Actions cannot produce a properly notarized public release.
+```bash
+pnpm install      # Install dependencies
+pnpm dev          # Run in dev mode
+pnpm build        # Production build
+pnpm typecheck    # Type check
+pnpm test         # Run tests
+pnpm dist:mac     # Build macOS .dmg
+```
 
 ## Tech Stack
 
-Electron 33 · React 19 · TypeScript · Zustand · shadcn/ui · better-sqlite3 · electron-vite
+Electron 33 · React 19 · TypeScript · Vite · Zustand · shadcn/ui · Tailwind CSS 4 · better-sqlite3
+
+## License
+
+MIT

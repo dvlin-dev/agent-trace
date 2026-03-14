@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { ScrollArea } from "./ui/scroll-area";
 import { Badge } from "./ui/badge";
-import { Button } from "./ui/button";
 import { RequestItem } from "./request-item";
 import type {
   ExchangeListItemVM,
@@ -9,7 +8,6 @@ import type {
   InspectorSection,
 } from "../../../shared/contracts";
 import { useTraceStore } from "../stores/trace-store";
-import { X } from "lucide-react";
 import { cn } from "../lib/utils";
 
 interface InspectorPanelProps {
@@ -59,18 +57,6 @@ export function InspectorPanel({
 
   return (
     <div className="flex h-full flex-col border-l">
-      <div className="flex items-center justify-between border-b px-4 py-3 shrink-0">
-        <span className="text-xs font-medium">Inspector</span>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-6 w-6 p-0"
-          onClick={onClose ?? toggleInspector}
-        >
-          <X className="h-3.5 w-3.5" />
-        </Button>
-      </div>
-
       <div className="flex gap-1 border-b px-3 py-2 shrink-0 overflow-x-auto">
         {sectionTabs.map(({ id, label }) => (
           <button
