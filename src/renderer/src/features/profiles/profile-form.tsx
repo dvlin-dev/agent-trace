@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Check, Copy } from "lucide-react";
 import type { ConnectionProfile, ProviderId } from "../../../../shared/contracts";
 import { DEFAULT_PROFILE_PORT_START } from "../../../../shared/defaults";
 import { Button } from "../../components/ui/button";
@@ -49,6 +50,15 @@ export function ProfileForm({
   );
   const [localPort, setLocalPort] = useState(initialProfile?.localPort ?? DEFAULT_PROFILE_PORT_START);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const localAddress = `http://127.0.0.1:${localPort}`;
+
+  function copyAddress() {
+    navigator.clipboard.writeText(localAddress);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  }
 
   useEffect(() => {
     const option = getProviderOption(providerId);
@@ -130,15 +140,24 @@ export function ProfileForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="profile-local-port">Local port</Label>
-        <Input
-          id="profile-local-port"
-          type="number"
-          min={1}
-          max={65535}
-          value={String(localPort)}
-          onChange={(event) => setLocalPort(Number(event.target.value) || DEFAULT_PROFILE_PORT_START)}
-        />
+        <Label>Local address</Label>
+        <div className="flex gap-2">
+          <div className="flex flex-1 items-center border bg-transparent shadow-xs">
+            <span className="pl-3 text-sm text-muted-foreground select-none">http://127.0.0.1:</span>
+            <input
+              type="number"
+              min={1}
+              max={65535}
+              value={localPort}
+              onChange={(event) => setLocalPort(Number(event.target.value) || DEFAULT_PROFILE_PORT_START)}
+              className="h-9 w-20 bg-transparent text-sm outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+            />
+          </div>
+          <Button type="button" variant="outline" size="sm" className="h-9 gap-1.5" onClick={copyAddress}>
+            {copied ? <Check className="h-3 w-3 text-emerald-500" /> : <Copy className="h-3 w-3" />}
+            {copied ? "Copied" : "Copy"}
+          </Button>
+        </div>
       </div>
 
       <Button

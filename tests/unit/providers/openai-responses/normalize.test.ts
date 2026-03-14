@@ -71,7 +71,68 @@ describe("openai responses normalize", () => {
     expect(normalized.response.usage).toEqual({
       inputTokens: 123,
       outputTokens: 1,
-      reasoningTokens: null,
+      reasoningTokens: 0,
+    });
+  });
+
+  it("extracts reasoning_tokens from output_tokens_details", () => {
+    const exchange = makeExchange();
+    exchange.responseBody = textBody(
+      [
+        `data: {"type":"response.completed","response":{"id":"resp_1","status":"completed","model":"o3","output":[{"id":"msg_1","type":"message","status":"completed","role":"assistant","content":[{"type":"output_text","text":"answer"}]}],"usage":{"input_tokens":100,"output_tokens":50,"output_tokens_details":{"reasoning_tokens":30},"total_tokens":150}}}`,
+        "data: [DONE]",
+        "",
+      ].join("\n"),
+      "text/event-stream",
+    );
+    const normalized = openaiResponsesAdapter.normalize(exchange);
+    expect(normalized.response.usage).toEqual({
+      inputTokens: 100,
+      outputTokens: 50,
+      reasoningTokens: 30,
+    });
+  });
+
+  it("parses reasoning output items with summary array", () => {
+    const exchange = makeExchange();
+    exchange.responseBody = textBody(
+      [
+        `data: {"type":"response.completed","response":{"id":"resp_1","status":"completed","model":"o3","output":[{"id":"rs_1","type":"reasoning","summary":[{"type":"summary_text","text":"Thinking about the problem."},{"type":"summary_text","text":"Considering options."}]},{"id":"msg_1","type":"message","status":"completed","role":"assistant","content":[{"type":"output_text","text":"done"}]}],"usage":{"input_tokens":10,"output_tokens":5,"output_tokens_details":{"reasoning_tokens":20},"total_tokens":15}}}`,
+        "data: [DONE]",
+        "",
+      ].join("\n"),
+      "text/event-stream",
+    );
+    const normalized = openaiResponsesAdapter.normalize(exchange);
+    expect(normalized.response.outputMessages[0]).toEqual({
+      role: "assistant",
+      blocks: [{ type: "reasoning", text: "Thinking about the problem.\nConsidering options." }],
+    });
+    expect(normalized.response.outputMessages[1]?.blocks[0]).toEqual({
+      type: "text",
+      text: "done",
+    });
+  });
+
+  it("captures reasoning summary text from SSE delta events", () => {
+    const exchange = makeExchange();
+    exchange.responseBody = textBody(
+      [
+        `data: {"type":"response.output_item.added","output_index":0,"item":{"id":"rs_1","type":"reasoning"}}`,
+        `data: {"type":"response.reasoning_summary_text.delta","output_index":0,"summary_index":0,"delta":"Thinking"}`,
+        `data: {"type":"response.reasoning_summary_text.delta","output_index":0,"summary_index":0,"delta":" hard."}`,
+        `data: {"type":"response.reasoning_summary_text.done","output_index":0,"summary_index":0,"text":"Thinking hard."}`,
+        `data: {"type":"response.output_item.done","output_index":0,"item":{"id":"rs_1","type":"reasoning","summary":[{"type":"summary_text","text":"Thinking hard."}]}}`,
+        `data: {"type":"response.completed","response":{"id":"resp_1","status":"completed","output":[{"id":"rs_1","type":"reasoning","summary":[{"type":"summary_text","text":"Thinking hard."}]}],"usage":{"input_tokens":5,"output_tokens":3,"output_tokens_details":{"reasoning_tokens":10},"total_tokens":8}}}`,
+        "data: [DONE]",
+        "",
+      ].join("\n"),
+      "text/event-stream",
+    );
+    const normalized = openaiResponsesAdapter.normalize(exchange);
+    expect(normalized.response.outputMessages[0]).toEqual({
+      role: "assistant",
+      blocks: [{ type: "reasoning", text: "Thinking hard." }],
     });
   });
 });

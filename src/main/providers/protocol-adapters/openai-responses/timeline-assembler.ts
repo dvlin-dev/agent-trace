@@ -4,6 +4,7 @@ import type {
   SessionTimeline,
   TimelineAssembler,
 } from "../../../../shared/contracts";
+import { annotateTimeline } from "../shared/annotate-blocks";
 
 function fingerprint(message: NormalizedMessage): string {
   return JSON.stringify(message);
@@ -12,23 +13,26 @@ function fingerprint(message: NormalizedMessage): string {
 export const openaiResponsesTimelineAssembler: TimelineAssembler = {
   build(exchanges: NormalizedExchange[]): SessionTimeline {
     const messages: NormalizedMessage[] = [];
-    const seenSystemMessages = new Set<string>();
+    const seen = new Set<string>();
 
     for (const exchange of exchanges) {
+      // Codex sends full conversation history in `input` each turn.
+      // Deduplicate all input messages (not just system) to avoid repeats.
       for (const message of exchange.request.inputMessages) {
-        if (message.role === "system") {
-          const key = fingerprint(message);
-          if (seenSystemMessages.has(key)) {
-            continue;
-          }
-          seenSystemMessages.add(key);
+        const key = fingerprint(message);
+        if (seen.has(key)) {
+          continue;
         }
+        seen.add(key);
         messages.push(message);
       }
 
-      messages.push(...exchange.response.outputMessages);
+      for (const message of exchange.response.outputMessages) {
+        seen.add(fingerprint(message));
+        messages.push(message);
+      }
     }
 
-    return { messages };
+    return { messages: annotateTimeline(messages) };
   },
 };

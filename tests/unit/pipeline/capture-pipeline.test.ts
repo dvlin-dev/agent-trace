@@ -8,7 +8,6 @@ import { HistoryMaintenanceService } from "../../../src/main/storage/history-mai
 import { SessionRepository } from "../../../src/main/storage/session-repository";
 import { createSqliteDatabase } from "../../../src/main/storage/sqlite";
 import type { CapturedExchange, ProtocolAdapter } from "../../../src/shared/contracts";
-import { zstdCompressSync } from "node:zlib";
 
 function textBody(text: string, contentType = "application/json") {
   return {
@@ -16,6 +15,14 @@ function textBody(text: string, contentType = "application/json") {
     contentType,
     contentEncoding: null,
   };
+}
+
+function fixedZstdCompressedProbeRequest(): Buffer {
+  // Generated once from the exact request JSON in the zstd pipeline test.
+  return Buffer.from(
+    "KLUv/QRYJQQA8okdHHA1zgHNKiOSjJUd1pumf0d9ACAYmIF0FgmqekLPVSWA8xNXjd5yz0x6rhodxlkV4hodz/H4B0zmM/I2X8M2tpb1XYgYOa/N5ytMI19Jqmd8PgtYO8Z5GyuaJ0ggnoloWPBZFy6LtFxdi5EFxSCwTPFZPUHGTgMAKsKvU1diXGoPHAznZg==",
+    "base64",
+  );
 }
 
 function makeExchange(): CapturedExchange {
@@ -165,7 +172,7 @@ describe("capture pipeline", () => {
           '{"turn_id":"turn-codex-1","sandbox":"none"}',
       },
       requestBody: {
-        bytes: zstdCompressSync(Buffer.from(requestJson, "utf-8")),
+        bytes: fixedZstdCompressedProbeRequest(),
         contentType: "application/json",
         contentEncoding: "zstd",
       },

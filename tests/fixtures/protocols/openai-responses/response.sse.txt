@@ -20,6 +20,6 @@ event: response.output_item.done
 data: {"type":"response.output_item.done","output_index":0,"item":{"id":"msg_fixture_codex","type":"message","status":"completed","role":"assistant","content":[{"type":"output_text","text":"probe","annotations":[]}]}}
 
 event: response.completed
-data: {"type":"response.completed","response":{"id":"resp_fixture_codex","object":"response","status":"completed","model":"gpt-5.4","output":[{"id":"msg_fixture_codex","type":"message","status":"completed","role":"assistant","content":[{"type":"output_text","text":"probe","annotations":[]}]}],"usage":{"input_tokens":123,"output_tokens":1,"total_tokens":124}}}
+data: {"type":"response.completed","response":{"id":"resp_fixture_codex","object":"response","status":"completed","model":"gpt-5.4","output":[{"id":"msg_fixture_codex","type":"message","status":"completed","role":"assistant","content":[{"type":"output_text","text":"probe","annotations":[]}]}],"usage":{"input_tokens":123,"output_tokens":1,"output_tokens_details":{"reasoning_tokens":0},"total_tokens":124}}}
 
 data: [DONE]

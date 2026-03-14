@@ -8,6 +8,8 @@ import type {
   SessionTraceVM,
 } from "../../shared/contracts";
 import { ExchangeRepository } from "../storage/exchange-repository";
+import { hasMeaningfulSessionTitle } from "../providers/protocol-adapters/shared/derive-title";
+import { stripXmlTags } from "../../shared/strip-xml";
 import {
   SessionRepository,
   type SessionRow,
@@ -32,6 +34,49 @@ export class SessionQueryService {
     private readonly protocolAdapters: Map<string, ProtocolAdapter>,
   ) {}
 
+  private getAdapter(providerId: ProviderId): ProtocolAdapter | null {
+    const provider = this.providerCatalog.get(providerId);
+    if (!provider) {
+      return null;
+    }
+
+    return this.protocolAdapters.get(provider.protocolAdapterId) ?? null;
+  }
+
+  private deriveDisplayTitle(row: SessionRow, providerId: ProviderId): string {
+    if (hasMeaningfulSessionTitle(row.title, row.model)) {
+      return row.title;
+    }
+
+    const adapter = this.getAdapter(providerId);
+    if (!adapter) {
+      return row.title;
+    }
+
+    const exchanges = this.exchangeRepository.listBySessionId(row.session_id);
+    for (const exchange of exchanges) {
+      const normalized = safeParseJson<NormalizedExchange | null>(
+        exchange.normalized_json as string,
+        null,
+      );
+      if (!normalized) {
+        continue;
+      }
+
+      const candidate = adapter.sessionMatcher.deriveTitle(normalized);
+      if (
+        candidate &&
+        hasMeaningfulSessionTitle(candidate, normalized.model ?? row.model)
+      ) {
+        return candidate;
+      }
+    }
+
+    // Last resort: clean raw title (strip XML tags, trim)
+    const cleaned = stripXmlTags(row.title).trim();
+    return cleaned || row.model || row.title;
+  }
+
   private mapSessionRow(row: SessionRow): SessionListItemVM {
     const providerId = row.provider_id as ProviderId;
     const provider = this.providerCatalog.get(providerId);
@@ -40,7 +85,7 @@ export class SessionQueryService {
       providerId,
       providerLabel: provider?.label ?? providerId,
       profileId: row.profile_id,
-      title: row.title,
+      title: this.deriveDisplayTitle(row, providerId),
       model: row.model,
       updatedAt: row.updated_at,
       exchangeCount: row.exchange_count,
@@ -96,7 +141,7 @@ export class SessionQueryService {
       throw new Error(`Unknown provider for session: ${providerId}`);
     }
 
-    const adapter = this.protocolAdapters.get(provider.protocolAdapterId);
+    const adapter = this.getAdapter(providerId);
     if (!adapter) {
       throw new Error(`Missing adapter: ${provider.protocolAdapterId}`);
     }
@@ -127,7 +172,7 @@ export class SessionQueryService {
       providerId,
       providerLabel: provider.label,
       profileId: session.profile_id,
-      title: session.title,
+      title: this.deriveDisplayTitle(session, providerId),
       instructions,
       timeline: adapter.timelineAssembler.build(normalizedExchanges),
       exchanges: exchanges.map((row) => {

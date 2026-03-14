@@ -152,18 +152,31 @@ function normalizeResponseItem(item: JsonObject): NormalizedMessage[] {
           ],
         },
       ];
-    case "reasoning":
+    case "reasoning": {
+      let text = "";
+      if (Array.isArray(item.summary)) {
+        text = item.summary
+          .filter(
+            (part): part is JsonObject =>
+              !!part && typeof part === "object" && typeof (part as JsonObject).text === "string",
+          )
+          .map((part) => part.text as string)
+          .join("\n");
+      }
+      if (!text) {
+        text = String(item._summaryText ?? item.text ?? "");
+      }
+      // Skip reasoning items with no readable content (e.g. encrypted_content only)
+      if (!text) {
+        return [];
+      }
       return [
         {
           role: "assistant",
-          blocks: [
-            {
-              type: "reasoning",
-              text: String(item.summary ?? item.text ?? ""),
-            },
-          ],
+          blocks: [{ type: "reasoning", text }],
         },
       ];
+    }
     default:
       return [];
   }
@@ -227,13 +240,20 @@ function parseUsage(value: unknown): NormalizedUsage | null {
   }
 
   const usage = value as JsonObject;
+  const outputDetails =
+    usage.output_tokens_details &&
+    typeof usage.output_tokens_details === "object"
+      ? (usage.output_tokens_details as JsonObject)
+      : null;
   return {
     inputTokens:
       typeof usage.input_tokens === "number" ? usage.input_tokens : null,
     outputTokens:
       typeof usage.output_tokens === "number" ? usage.output_tokens : null,
     reasoningTokens:
-      typeof usage.reasoning_tokens === "number" ? usage.reasoning_tokens : null,
+      typeof outputDetails?.reasoning_tokens === "number"
+        ? outputDetails.reasoning_tokens
+        : null,
   };
 }
 
@@ -372,10 +392,24 @@ function parseResponseStream(body: string | null): ResponseStreamState {
         }
         break;
       }
-      case "response.reasoning_summary_text.delta":
-      case "response.reasoning_summary_text.done":
       case "response.reasoning_summary_part.added":
       case "response.reasoning_summary_part.done": {
+        break;
+      }
+      case "response.reasoning_summary_text.delta": {
+        const index =
+          typeof parsed.output_index === "number" ? parsed.output_index : 0;
+        const item = ensureOutputItem(state, index, { type: "reasoning" });
+        item._summaryText = `${String(item._summaryText ?? "")}${String(parsed.delta ?? "")}`;
+        break;
+      }
+      case "response.reasoning_summary_text.done": {
+        const index =
+          typeof parsed.output_index === "number" ? parsed.output_index : 0;
+        const item = ensureOutputItem(state, index, { type: "reasoning" });
+        if (typeof parsed.text === "string") {
+          item._summaryText = parsed.text;
+        }
         break;
       }
       case "response.failed": {

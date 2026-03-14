@@ -11,6 +11,7 @@ interface ProfileState {
   initialize: () => Promise<void>;
   saveProfiles: (profiles: ConnectionProfile[]) => Promise<ConnectionProfile[]>;
   upsertProfile: (profile: ConnectionProfile) => Promise<ConnectionProfile[]>;
+  deleteProfile: (profileId: string) => Promise<ConnectionProfile[]>;
   startProfile: (profileId: string) => Promise<void>;
   stopProfile: (profileId: string) => Promise<void>;
   setStatuses: (statuses: ProfileStatuses) => void;
@@ -53,6 +54,11 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
       : [...currentProfiles, profile];
 
     return get().saveProfiles(nextProfiles);
+  },
+
+  deleteProfile: async (profileId) => {
+    const remaining = get().profiles.filter((p) => p.id !== profileId);
+    return get().saveProfiles(remaining);
   },
 
   startProfile: async (profileId) => {

@@ -87,7 +87,8 @@ export const useTraceStore = create<TraceState>((set, get) => {
       await loadExchangeDetail(exchangeId);
     },
 
-    toggleInspector: () => set((state) => ({ inspectorOpen: !state.inspectorOpen })),
+    toggleInspector: () =>
+      set((state) => ({ inspectorOpen: !state.inspectorOpen })),
     toggleRawMode: () => set((state) => ({ rawMode: !state.rawMode })),
     clear: () => {
       syncVersion++;

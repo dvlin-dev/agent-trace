@@ -1,4 +1,5 @@
 import type { NormalizedExchange, SessionTimeline, TimelineAssembler } from "../../../../shared/contracts";
+import { annotateTimeline } from "../shared/annotate-blocks";
 
 function buildSnapshotTimeline(exchanges: NormalizedExchange[]): SessionTimeline {
   const last = exchanges[exchanges.length - 1];
@@ -7,10 +8,10 @@ function buildSnapshotTimeline(exchanges: NormalizedExchange[]): SessionTimeline
   }
 
   return {
-    messages: [
+    messages: annotateTimeline([
       ...last.request.inputMessages,
       ...last.response.outputMessages,
-    ],
+    ]),
   };
 }
 
