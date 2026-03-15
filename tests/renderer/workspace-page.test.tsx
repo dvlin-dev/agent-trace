@@ -37,12 +37,9 @@ vi.mock("../../src/renderer/src/lib/electron-api", () => ({
 }));
 
 describe("EmptyState", () => {
-  it("displays no sessions message", () => {
+  it("displays waiting for traffic message", () => {
     render(<EmptyState />);
-    expect(screen.getByText("No sessions yet")).toBeInTheDocument();
-    expect(
-      screen.getByText(/start listening to capture/i),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Waiting for first request...")).toBeInTheDocument();
   });
 });
 
@@ -119,7 +116,7 @@ describe("SessionSidebar", () => {
 
   it("shows empty state when no sessions", () => {
     render(<SessionSidebar />);
-    expect(screen.getByText("No sessions yet")).toBeInTheDocument();
+    expect(screen.getByText("Waiting for first request...")).toBeInTheDocument();
   });
 
   it("renders sessions from store", () => {

@@ -1,15 +1,13 @@
-import { Radio } from "lucide-react";
-
 export function EmptyState() {
   return (
-    <div className="flex flex-col items-center justify-center gap-4 p-8 text-center">
-      <Radio className="h-12 w-12 text-muted-foreground/50" />
-      <div className="space-y-1">
-        <p className="text-sm font-medium">No sessions yet</p>
-        <p className="text-xs text-muted-foreground">
-          Start listening to capture agent traffic
-        </p>
-      </div>
+    <div className="flex items-center justify-center gap-1.5 p-6">
+      <span className="relative flex h-2 w-2">
+        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-30" />
+        <span className="relative inline-flex rounded-full h-2 w-2 bg-success" />
+      </span>
+      <span className="text-[11px] text-muted-foreground">
+        Waiting for first request...
+      </span>
     </div>
   );
 }

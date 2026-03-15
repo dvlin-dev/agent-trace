@@ -14,16 +14,8 @@ import {
   DialogClose,
 } from "./ui/dialog";
 import { ProfileForm } from "../features/profiles/profile-form";
-import type { ConnectionProfile, ProviderId } from "../../../shared/contracts";
-
-function providerTag(providerId: ProviderId): { label: string; className: string } {
-  switch (providerId) {
-    case "anthropic":
-      return { label: "AN", className: "bg-accent-brand-muted text-accent-brand" };
-    case "codex":
-      return { label: "CX", className: "bg-success-muted text-success" };
-  }
-}
+import type { ConnectionProfile } from "../../../shared/contracts";
+import { ProviderBadge } from "../features/profiles/components/provider-badge";
 
 export function ProfileSwitcher() {
   const profiles = useProfileStore((s) => s.profiles);
@@ -141,7 +133,6 @@ interface ProfileRowProps {
 function ProfileRow({ profile, port, isRunning, onToggle, onEdit, onDelete }: ProfileRowProps) {
   const [hovered, setHovered] = useState(false);
   const [rowHovered, setRowHovered] = useState(false);
-  const tag = providerTag(profile.providerId);
 
   return (
     <div
@@ -155,9 +146,7 @@ function ProfileRow({ profile, port, isRunning, onToggle, onEdit, onDelete }: Pr
           isRunning ? "bg-success shadow-[0_0_4px_rgba(52,211,153,0.4)]" : "bg-muted-foreground/30",
         )}
       />
-      <span className={cn("text-[11px] font-bold shrink-0 px-1", tag.className)}>
-        {tag.label}
-      </span>
+      <ProviderBadge providerId={profile.providerId} className="shrink-0" />
       <span className="text-xs font-medium truncate flex-1">{profile.name}</span>
 
       {/* Edit / Delete — visible on row hover */}

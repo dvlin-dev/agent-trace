@@ -50,21 +50,19 @@ describe("ProfileSetupPage", () => {
     });
   });
 
-  it("shows provider cards and existing profiles on Step 1", async () => {
+  it("shows provider cards on Step 1", async () => {
     render(<ProfileSetupPage />);
 
     expect(screen.getByText("Welcome to Agent Trace")).toBeInTheDocument();
     expect(screen.getByText("Claude Code")).toBeInTheDocument();
-    expect(screen.getByText("Codex")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /next/i })).toBeInTheDocument();
-
-    expect(await screen.findByText("anthropic-dev")).toBeInTheDocument();
+    expect(screen.getByText("Codex CLI")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /continue/i })).toBeInTheDocument();
   });
 
   it("shows upstream URL and local address on Step 2", () => {
     render(<ProfileSetupPage />);
 
-    fireEvent.click(screen.getByRole("button", { name: /next/i }));
+    fireEvent.click(screen.getByRole("button", { name: /continue/i }));
 
     expect(
       screen.getByDisplayValue("https://api.anthropic.com"),
@@ -81,7 +79,7 @@ describe("ProfileSetupPage", () => {
   it("navigates to manual form from Step 2", async () => {
     render(<ProfileSetupPage />);
 
-    fireEvent.click(screen.getByRole("button", { name: /next/i }));
+    fireEvent.click(screen.getByRole("button", { name: /continue/i }));
     fireEvent.click(screen.getByText(/manual configuration/i));
 
     expect(screen.getByLabelText(/profile name/i)).toBeInTheDocument();
@@ -91,7 +89,7 @@ describe("ProfileSetupPage", () => {
   it("creates a profile via quick-start on Step 2", async () => {
     render(<ProfileSetupPage />);
 
-    fireEvent.click(screen.getByRole("button", { name: /next/i }));
+    fireEvent.click(screen.getByRole("button", { name: /continue/i }));
     fireEvent.click(screen.getByRole("button", { name: /start listening/i }));
 
     await waitFor(() => {
