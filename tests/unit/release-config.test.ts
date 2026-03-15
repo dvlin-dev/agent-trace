@@ -52,7 +52,7 @@ describe("macOS release config", () => {
     );
     await expect(read("scripts/release.sh")).resolves.toContain("pnpm rebuild:node");
     await expect(read("scripts/release.sh")).resolves.toContain("pnpm typecheck");
-    await expect(read("scripts/release.sh")).resolves.toContain("pnpm test");
+    await expect(read("scripts/release.sh")).resolves.toContain("pnpm vitest run");
     await expect(read("build/entitlements.mac.plist")).resolves.toContain(
       "com.apple.security.cs.allow-jit",
     );

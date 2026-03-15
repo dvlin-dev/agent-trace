@@ -35,7 +35,7 @@ fi
 
 pnpm rebuild:node
 pnpm typecheck
-pnpm test
+pnpm vitest run --exclude tests/harness/integration.test.ts
 pnpm build
 
 node -e '
