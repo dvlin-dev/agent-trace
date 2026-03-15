@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quickstart v2 — Design Mockup</title>
+<style>
+  :root {
+    --bg: #0f0f0f; --surface: #171717; --elevated: #1e1e1e; --hover: #262626;
+    --border: #2a2a2a; --border-s: #222; --text: #e5e5e5; --text2: #999; --text3: #666; --text4: #444;
+    /* accent-brand: warm orange from design tokens oklch(0.78 0.14 55) */
+    --brand: #e2822b; --brand-s: rgba(226,130,43,0.12); --brand-dim: rgba(226,130,43,0.6);
+    --green: #34d399; --green-s: rgba(52,211,153,0.12);
+    --red: #f87171;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background:#050505; color:var(--text); -webkit-font-smoothing:antialiased; }
+  code { font-family: 'SF Mono','Menlo', monospace; font-size:0.88em; background:var(--elevated); padding:1px 5px; border-radius:3px; }
+
+  .page { max-width:820px; margin:0 auto; padding:48px 32px 80px; }
+  h1 { font-size:28px; font-weight:700; letter-spacing:-0.03em; margin-bottom:6px; }
+  h1 span { color:var(--brand); }
+  .sub { color:var(--text2); font-size:14px; margin-bottom:48px; }
+  h2 { font-size:18px; font-weight:600; margin:48px 0 6px; letter-spacing:-0.01em; }
+  h2 .t { display:inline-block; background:var(--brand-s); color:var(--brand); font-size:9px; font-weight:700; padding:2px 6px; border-radius:3px; margin-left:6px; vertical-align:middle; text-transform:uppercase; letter-spacing:0.05em; }
+  .desc { color:var(--text2); font-size:13px; margin-bottom:16px; max-width:640px; line-height:1.6; }
+  hr { border:none; border-top:1px solid var(--border); margin:48px 0; }
+
+  /* Frame */
+  .frame { background:var(--bg); border:1px solid var(--border); border-radius:10px; overflow:hidden; box-shadow:0 16px 40px rgba(0,0,0,0.5); margin:16px 0 32px; }
+  .tb { height:36px; background:var(--surface); border-bottom:1px solid var(--border); display:flex; align-items:center; padding:0 14px; gap:7px; }
+  .d { width:11px; height:11px; border-radius:50%; } .d.r{background:#ff5f57;} .d.y{background:#febc2e;} .d.g{background:#28c840;}
+  .tb-t { flex:1; text-align:center; color:var(--text4); font-size:11px; font-weight:500; }
+
+  /* Common */
+  .center { display:flex; flex-direction:column; align-items:center; text-align:center; padding:48px 48px 40px; }
+  .title { font-size:18px; font-weight:700; letter-spacing:-0.02em; margin-bottom:4px; }
+  .hint { font-size:13px; color:var(--text2); margin-bottom:24px; max-width:420px; line-height:1.5; }
+
+  /* App Logo */
+  .app-logo { width:56px; height:56px; margin-bottom:20px; position:relative; }
+  .app-logo svg { width:56px; height:56px; border-radius:12px; box-shadow: 0 4px 20px rgba(226,130,43,0.2); }
+
+  /* Step indicator */
+  .steps { display:flex; justify-content:center; gap:6px; margin-bottom:24px; }
+  .step-dot { width:6px; height:6px; border-radius:50%; background:var(--text4); transition: all 0.2s; }
+  .step-dot.a { background:var(--brand); width:18px; border-radius:3px; }
+  .step-dot.done { background:var(--brand-dim); }
+
+  /* Provider cards */
+  .cards { display:flex; gap:12px; justify-content:center; margin-bottom:28px; }
+  .card { width:200px; padding:16px; border:1px solid var(--border); background:var(--surface); text-align:left; cursor:pointer; transition:all 0.15s; position:relative; }
+  .card:hover { border-color:var(--text3); }
+  .card.s { border-color:var(--brand); background:var(--brand-s); box-shadow:0 0 0 1px var(--brand); }
+  .card-icon { width:28px; height:28px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; margin-bottom:10px; letter-spacing:0.02em; }
+  .card-icon.an { background:var(--brand-s); color:var(--brand); }
+  .card-icon.cx { background:var(--green-s); color:var(--green); }
+  .card-name { font-size:14px; font-weight:600; margin-bottom:2px; }
+  .card-desc { font-size:11px; color:var(--text3); line-height:1.4; }
+  .card-check { position:absolute; top:10px; right:10px; width:16px; height:16px; border-radius:50%; background:var(--brand); display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity 0.15s; }
+  .card.s .card-check { opacity:1; }
+  .card-check svg { width:10px; height:10px; }
+
+  /* Config panel */
+  .config { width:100%; max-width:520px; margin:0 auto; text-align:left; }
+  .config-section { margin-bottom:16px; }
+  .config-label { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.06em; color:var(--text3); margin-bottom:6px; display:flex; align-items:center; gap:6px; }
+  .config-label .num { display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; border-radius:50%; background:var(--brand); color:white; font-size:10px; font-weight:700; }
+  .config-hint { font-size:11px; color:var(--text4); margin-top:4px; line-height:1.5; }
+
+  .input-row { display:flex; align-items:center; gap:8px; }
+  .input { flex:1; height:36px; padding:0 12px; background:var(--elevated); border:1px solid var(--border); color:var(--text); font-size:12px; font-family:'SF Mono','Menlo',monospace; outline:none; }
+  .input:focus { border-color:var(--brand); box-shadow:0 0 0 1px var(--brand); }
+  .input.readonly { color:var(--text2); cursor:default; }
+  .copy-btn { height:36px; padding:0 12px; background:var(--elevated); border:1px solid var(--border); color:var(--text2); font-size:11px; cursor:pointer; white-space:nowrap; display:flex; align-items:center; gap:5px; font-weight:500; }
+  .copy-btn:hover { background:var(--hover); color:var(--text); }
+
+  /* Data flow diagram — the key visual */
+  .dataflow { display:flex; align-items:stretch; gap:0; margin:20px 0 24px; font-size:11px; width:100%; max-width:500px; }
+  .dataflow-node { flex:1; padding:10px 12px; border:1px solid var(--border); background:var(--surface); position:relative; text-align:center; }
+  .dataflow-node .label { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.06em; color:var(--text4); margin-bottom:3px; }
+  .dataflow-node .value { font-family:'SF Mono','Menlo',monospace; font-size:11px; color:var(--text); word-break:break-all; }
+  .dataflow-node.mid { border-color:var(--brand); background:var(--brand-s); }
+  .dataflow-node.mid .label { color:var(--brand-dim); }
+  .dataflow-node.mid .value { color:var(--brand); }
+  .dataflow-arrow { display:flex; align-items:center; justify-content:center; width:32px; flex-shrink:0; color:var(--text4); font-size:16px; }
+
+  /* Shell block */
+  .shell { background:#0a0a0a; border:1px solid var(--border); padding:12px 14px; margin-top:8px; }
+  .shell-label { font-size:10px; color:var(--text4); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:6px; font-weight:600; }
+  .shell-row { display:flex; align-items:center; gap:10px; }
+  .shell-code { font-family:'SF Mono','Menlo',monospace; font-size:12px; color:var(--green); line-height:1.6; flex:1; min-width:0; }
+  .shell-copy { font-size:10px; color:var(--text2); cursor:pointer; padding:4px 10px; border:1px solid var(--text4); font-weight:500; background:var(--elevated); flex-shrink:0; }
+  .shell-copy:hover { background:var(--hover); color:var(--text); }
+
+  /* Divider with label */
+  .divider-label { display:flex; align-items:center; gap:10px; margin:20px 0; font-size:11px; color:var(--text4); }
+  .divider-label::before, .divider-label::after { content:''; flex:1; height:1px; background:var(--border); }
+
+  /* Buttons */
+  .btn { padding:9px 24px; background:var(--brand); color:white; font-size:13px; font-weight:600; border:none; cursor:pointer; letter-spacing:-0.01em; }
+  .btn:hover { filter:brightness(1.1); }
+  .btn:disabled { opacity:0.5; cursor:default; }
+  .btn-ghost { padding:9px 14px; background:transparent; border:1px solid var(--border); color:var(--text2); font-size:12px; cursor:pointer; }
+  .btn-ghost:hover { background:var(--hover); color:var(--text); }
+
+  .actions { display:flex; align-items:center; justify-content:center; gap:10px; margin-top:24px; }
+
+  /* Annotation */
+  .ann { background:var(--brand-s); border:1px solid rgba(226,130,43,0.15); padding:12px 16px; margin:12px 0 0; font-size:12px; color:var(--text2); line-height:1.6; }
+  .ann strong { color:var(--brand); font-weight:600; }
+
+  /* Change callout */
+  .change { display:flex; gap:10px; margin:10px 0; padding:10px 14px; border:1px solid var(--border); background:var(--surface); font-size:12px; }
+  .change-tag { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; padding:2px 6px; border-radius:3px; white-space:nowrap; height:fit-content; margin-top:1px; }
+  .change-tag.new { background:var(--green-s); color:var(--green); }
+  .change-tag.updated { background:var(--brand-s); color:var(--brand); }
+  .change-tag.removed { background:rgba(248,113,113,0.12); color:var(--red); }
+  .change-text { color:var(--text2); line-height:1.5; }
+
+  /* Comparison */
+  .compare { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:16px 0; }
+  .compare-col { }
+  .compare-label { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:8px; }
+  .compare-label.old { color:var(--red); }
+  .compare-label.new { color:var(--green); }
+
+  /* Success state */
+  .success-icon { width:48px; height:48px; border-radius:50%; background:var(--green-s); border:2px solid var(--green); display:flex; align-items:center; justify-content:center; margin-bottom:16px; }
+  .success-icon svg { width:24px; height:24px; }
+
+  .pulse-dot { width:8px; height:8px; border-radius:50%; background:var(--green); position:relative; }
+  .pulse-dot::after { content:''; position:absolute; inset:-4px; border-radius:50%; border:2px solid var(--green); opacity:0.3; animation:pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 0%,100% { opacity:0.3; transform:scale(1); } 50% { opacity:0; transform:scale(1.8); } }
+
+  /* Inline app logo for SVG */
+  .logo-inline { display:inline-flex; vertical-align:middle; }
+</style>
+</head>
+<body>
+<div class="page">
+
+<h1>Quickstart <span>v2</span></h1>
+<p class="sub">基于最新设计规范（e2b-inspired, accent-brand orange）重新设计 onboarding 流程</p>
+
+<!-- ========== CHANGE LOG ========== -->
+<h2>变更摘要</h2>
+
+<div class="change">
+  <span class="change-tag updated">Updated</span>
+  <span class="change-text"><strong>Logo</strong> — 将 🔍 emoji 替换为应用本体 icon（橙色波形），与品牌色 <code>--accent-brand</code> 统一</span>
+</div>
+<div class="change">
+  <span class="change-tag updated">Updated</span>
+  <span class="change-text"><strong>配色</strong> — 所有 <code>violet-500</code> accent 替换为 <code>--accent-brand</code>（暖橙 oklch(0.78 0.14 55)），与 design system overhaul 对齐</span>
+</div>
+<div class="change">
+  <span class="change-tag new">New</span>
+  <span class="change-text"><strong>数据流图</strong> — 新增三段式可视化流图，替代原有纯文字 chevron 箭头，直观展示「你的客户端 → Agent Trace → 上游 API」的关系</span>
+</div>
+<div class="change">
+  <span class="change-tag updated">Updated</span>
+  <span class="change-text"><strong>Provider 标识</strong> — emoji（🟠🟢）替换为带字母的 badge（AN / CX），与 workspace 中 profile-switcher 的 badge 风格统一</span>
+</div>
+<div class="change">
+  <span class="change-tag new">New</span>
+  <span class="change-text"><strong>Step 3 等待态</strong> — 新增「等待流量」的引导画面，包含 shell 命令和呼吸灯动画，避免用户「开了但不知道怎么用」</span>
+</div>
+<div class="change">
+  <span class="change-tag updated">Updated</span>
+  <span class="change-text"><strong>字号规范</strong> — 全部对齐到 4 级量表（Display 18px / Body 14px / Label 12px / Caption 11px），去除所有 &lt; 11px 字号</span>
+</div>
+
+<hr>
+
+<!-- ========== SCREEN 1: SELECT PROVIDER ========== -->
+<h2>Step 1 — 选择 Provider <span class="t">品牌色 + 真实 Logo</span></h2>
+<p class="desc">首屏使用应用真实 logo 而非 emoji，配色从 violet 切换到 accent-brand (橙)。Provider 卡片使用字母 badge（与 workspace 一致）。</p>
+
+<div class="compare">
+  <div class="compare-col">
+    <div class="compare-label old">Before</div>
+    <div style="padding:16px;border:1px solid var(--border);background:var(--surface);text-align:center;">
+      <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#7c6bf5,#a78bfa);display:inline-flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:8px;">🔍</div>
+      <div style="font-size:13px;font-weight:600;">Welcome to Agent Trace</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:4px;">violet accent + emoji icon</div>
+      <div style="display:flex;gap:6px;justify-content:center;margin-top:12px;">
+        <div style="padding:8px;border:1px solid #7c6bf5;background:rgba(124,107,245,0.1);font-size:11px;width:80px;">🟠 Claude</div>
+        <div style="padding:8px;border:1px solid var(--border);font-size:11px;width:80px;">🟢 Codex</div>
+      </div>
+    </div>
+  </div>
+  <div class="compare-col">
+    <div class="compare-label new">After</div>
+    <div style="padding:16px;border:1px solid var(--border);background:var(--surface);text-align:center;">
+      <svg width="40" height="40" viewBox="0 0 1024 1024" style="border-radius:8px;margin-bottom:8px;box-shadow:0 2px 12px rgba(226,130,43,0.2);">
+        <defs><clipPath id="r1"><rect width="1024" height="1024" rx="228" ry="228"/></clipPath></defs>
+        <g clip-path="url(#r1)"><rect width="1024" height="1024" fill="#141414"/>
+        <g stroke="#fff" stroke-opacity="0.03" stroke-width="1"><line x1="0" y1="256" x2="1024" y2="256"/><line x1="0" y1="512" x2="1024" y2="512"/><line x1="0" y1="768" x2="1024" y2="768"/><line x1="256" y1="0" x2="256" y2="1024"/><line x1="512" y1="0" x2="512" y2="1024"/><line x1="768" y1="0" x2="768" y2="1024"/></g>
+        <polyline points="120,580 280,580 340,580 380,300 460,720 540,300 620,720 680,440 740,440 904,440" fill="none" stroke="#E2822B" stroke-width="56" stroke-linecap="square" stroke-linejoin="miter"/>
+        <rect x="904" y="408" width="8" height="64" fill="#E2822B" opacity="0.6"/></g>
+      </svg>
+      <div style="font-size:13px;font-weight:600;">Welcome to Agent Trace</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:4px;">brand accent + real logo</div>
+      <div style="display:flex;gap:6px;justify-content:center;margin-top:12px;">
+        <div style="padding:8px;border:1px solid var(--brand);background:var(--brand-s);font-size:11px;width:80px;display:flex;align-items:center;gap:4px;justify-content:center;"><span style="background:var(--brand-s);color:var(--brand);font-size:9px;font-weight:700;padding:1px 4px;border-radius:3px;">AN</span> Claude</div>
+        <div style="padding:8px;border:1px solid var(--border);font-size:11px;width:80px;display:flex;align-items:center;gap:4px;justify-content:center;"><span style="background:var(--green-s);color:var(--green);font-size:9px;font-weight:700;padding:1px 4px;border-radius:3px;">CX</span> Codex</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="frame">
+  <div class="tb"><div class="d r"></div><div class="d y"></div><div class="d g"></div><div class="tb-t">Agent Trace</div></div>
+  <div class="center">
+    <div class="steps"><div class="step-dot a"></div><div class="step-dot"></div><div class="step-dot"></div></div>
+
+    <!-- Real app logo -->
+    <div class="app-logo">
+      <svg viewBox="0 0 1024 1024">
+        <defs><clipPath id="r2"><rect width="1024" height="1024" rx="228" ry="228"/></clipPath></defs>
+        <g clip-path="url(#r2)"><rect width="1024" height="1024" fill="#141414"/>
+        <g stroke="#fff" stroke-opacity="0.03" stroke-width="1"><line x1="0" y1="256" x2="1024" y2="256"/><line x1="0" y1="512" x2="1024" y2="512"/><line x1="0" y1="768" x2="1024" y2="768"/><line x1="256" y1="0" x2="256" y2="1024"/><line x1="512" y1="0" x2="512" y2="1024"/><line x1="768" y1="0" x2="768" y2="1024"/></g>
+        <polyline points="120,580 280,580 340,580 380,300 460,720 540,300 620,720 680,440 740,440 904,440" fill="none" stroke="#E2822B" stroke-width="56" stroke-linecap="square" stroke-linejoin="miter"/>
+        <rect x="904" y="408" width="8" height="64" fill="#E2822B" opacity="0.6"/>
+        <line x1="120" y1="512" x2="904" y2="512" stroke="#fff" stroke-opacity="0.06" stroke-width="2" stroke-dasharray="8,12"/></g>
+      </svg>
+    </div>
+
+    <div class="title">Welcome to Agent Trace</div>
+    <div class="hint">Intercept and inspect agent traffic. Select the agent you want to trace.</div>
+
+    <!-- Provider Cards -->
+    <div class="cards">
+      <div class="card s">
+        <div class="card-check"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div class="card-icon an">AN</div>
+        <div class="card-name">Claude Code</div>
+        <div class="card-desc">Anthropic Messages API</div>
+      </div>
+      <div class="card">
+        <div class="card-check"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div class="card-icon cx">CX</div>
+        <div class="card-name">Codex CLI</div>
+        <div class="card-desc">OpenAI Responses API</div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn">Continue</button>
+    </div>
+  </div>
+</div>
+
+<div class="ann">
+  <strong>设计变更：</strong>
+  Logo 从 🔍 emoji + violet 渐变 → 应用本体 SVG icon，品牌色保持一致。
+  Provider 卡片使用 AN/CX 字母 badge（与 workspace profile-switcher 一致），
+  选中态用 <code>--accent-brand</code> 边框，不再用 violet。
+  选中卡片右上角增加 checkmark 反馈。
+</div>
+
+<!-- ========== SCREEN 2: CONFIGURE ========== -->
+<h2>Step 2 — 配置连接 <span class="t">核心交互重设计</span></h2>
+<p class="desc">
+  关键改进：用三段式流图直观展示数据路径。<br>
+  <strong>上游 URL</strong> = 你想连的真实 API（可编辑）<br>
+  <strong>本地地址</strong> = Agent Trace 给你的监听入口（只读，一键复制）<br>
+  底部 shell 命令让用户知道在终端里执行什么。
+</p>
+
+<div class="frame">
+  <div class="tb"><div class="d r"></div><div class="d y"></div><div class="d g"></div><div class="tb-t">Agent Trace</div></div>
+  <div class="center" style="padding:36px 48px 32px;">
+    <div class="steps"><div class="step-dot done"></div><div class="step-dot a"></div><div class="step-dot"></div></div>
+
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+      <span class="card-icon an" style="width:22px;height:22px;font-size:9px;border-radius:4px;margin:0;">AN</span>
+      <span style="font-size:14px;font-weight:600;">Claude Code</span>
+    </div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:20px;">Configure how traffic flows through Agent Trace</div>
+
+    <!-- Data flow diagram — the key visual improvement -->
+    <div class="dataflow">
+      <div class="dataflow-node">
+        <div class="label">Your Client</div>
+        <div class="value">Claude Code</div>
+      </div>
+      <div class="dataflow-arrow">&#8594;</div>
+      <div class="dataflow-node mid">
+        <div class="label">Agent Trace</div>
+        <div class="value">127.0.0.1:8888</div>
+      </div>
+      <div class="dataflow-arrow">&#8594;</div>
+      <div class="dataflow-node">
+        <div class="label">Upstream API</div>
+        <div class="value">api.anthropic.com</div>
+      </div>
+    </div>
+
+    <div class="config">
+      <!-- Section 1: Upstream URL -->
+      <div class="config-section">
+        <div class="config-label">
+          <span class="num">1</span>
+          Upstream API URL
+        </div>
+        <div class="input-row">
+          <input class="input" value="https://api.anthropic.com" placeholder="https://api.anthropic.com" />
+        </div>
+        <div class="config-hint">
+          Where should Agent Trace forward requests? Change this if you use a custom endpoint or proxy.
+        </div>
+      </div>
+
+      <div class="divider-label">Agent Trace will listen on</div>
+
+      <!-- Section 2: Local address -->
+      <div class="config-section">
+        <div class="config-label">
+          <span class="num">2</span>
+          Your local listener
+        </div>
+        <div class="input-row">
+          <input class="input readonly" value="http://127.0.0.1:8888" readonly />
+          <button class="copy-btn">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copy
+          </button>
+        </div>
+        <div class="config-hint">
+          Point your agent client here instead of the upstream URL.
+        </div>
+      </div>
+
+      <!-- Shell block -->
+      <div class="shell">
+        <div class="shell-label">Run in your terminal</div>
+        <div class="shell-row">
+          <div class="shell-code">export ANTHROPIC_BASE_URL=http://127.0.0.1:8888</div>
+          <button class="shell-copy">Copy</button>
+        </div>
+      </div>
+
+      <!-- Advanced: port change -->
+      <details style="margin-top:12px;font-size:12px;">
+        <summary style="cursor:pointer;color:var(--text3);font-size:11px;">Advanced: change local port</summary>
+        <div style="margin-top:8px;display:flex;align-items:center;gap:8px;">
+          <span style="color:var(--text3);font-size:12px;">Port:</span>
+          <input class="input" type="number" value="8888" style="width:80px;" />
+        </div>
+      </details>
+    </div>
+
+    <div class="actions">
+      <button class="btn-ghost">&larr; Back</button>
+      <button class="btn">Start Listening</button>
+    </div>
+
+    <div style="margin-top:12px;">
+      <span style="font-size:11px;color:var(--text4);cursor:pointer;text-decoration:underline;text-underline-offset:2px;">Advanced: manual configuration</span>
+    </div>
+  </div>
+</div>
+
+<div class="ann">
+  <strong>核心改进：</strong><br>
+  1. 顶部三段式流图实时反映当前配置值，替代原有的纯文字 <code>Client → Agent Trace → API</code>。<br>
+  2. Agent Trace 节点高亮（品牌色边框 + 背景），让用户一眼看出 "中间人" 角色。<br>
+  3. 两个 URL 通过 divider label「Agent Trace will listen on」建立逻辑关联。<br>
+  4. Shell 命令区域标题改为 "Run in your terminal"，更直接。
+</div>
+
+<!-- ========== SCREEN 2b: CODEX VARIANT ========== -->
+<h2>Step 2 — Codex 变体 <span class="t">流图自动适配</span></h2>
+<p class="desc">切换 provider 后，流图、URL、端口、env var 全部联动更新。</p>
+
+<div class="frame">
+  <div class="tb"><div class="d r"></div><div class="d y"></div><div class="d g"></div><div class="tb-t">Agent Trace</div></div>
+  <div class="center" style="padding:36px 48px 32px;">
+    <div class="steps"><div class="step-dot done"></div><div class="step-dot a"></div><div class="step-dot"></div></div>
+
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+      <span class="card-icon cx" style="width:22px;height:22px;font-size:9px;border-radius:4px;margin:0;">CX</span>
+      <span style="font-size:14px;font-weight:600;">Codex CLI</span>
+    </div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:20px;">Configure how traffic flows through Agent Trace</div>
+
+    <div class="dataflow">
+      <div class="dataflow-node">
+        <div class="label">Your Client</div>
+        <div class="value">Codex CLI</div>
+      </div>
+      <div class="dataflow-arrow">&#8594;</div>
+      <div class="dataflow-node mid">
+        <div class="label">Agent Trace</div>
+        <div class="value">127.0.0.1:8889</div>
+      </div>
+      <div class="dataflow-arrow">&#8594;</div>
+      <div class="dataflow-node">
+        <div class="label">Upstream API</div>
+        <div class="value" style="font-size:10px;">chatgpt.com/backend-api/codex</div>
+      </div>
+    </div>
+
+    <div class="config">
+      <div class="config-section">
+        <div class="config-label"><span class="num">1</span> Upstream API URL</div>
+        <div class="input-row">
+          <input class="input" value="https://chatgpt.com/backend-api/codex" />
+        </div>
+        <div class="config-hint">Where should Agent Trace forward requests?</div>
+      </div>
+
+      <div class="divider-label">Agent Trace will listen on</div>
+
+      <div class="config-section">
+        <div class="config-label"><span class="num">2</span> Your local listener</div>
+        <div class="input-row">
+          <input class="input readonly" value="http://127.0.0.1:8889" readonly />
+          <button class="copy-btn">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copy
+          </button>
+        </div>
+        <div class="config-hint">Point your Codex CLI here instead of the upstream URL.</div>
+      </div>
+
+      <div class="shell">
+        <div class="shell-label">Run in your terminal</div>
+        <div class="shell-row">
+          <div class="shell-code">export OPENAI_BASE_URL=http://127.0.0.1:8889</div>
+          <button class="shell-copy">Copy</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn-ghost">&larr; Back</button>
+      <button class="btn">Start Listening</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SCREEN 3: WAITING FOR TRAFFIC ========== -->
+<h2>Step 3 — 等待流量 <span class="t">新增引导态</span></h2>
+<p class="desc">
+  <strong>新增画面</strong>：listener 启动后不直接跳 workspace，而是停留在引导画面，直到第一个请求到达后自动进入 workspace。
+  这解决了用户 "开了但不知道下一步" 的问题。
+</p>
+
+<div class="frame">
+  <div class="tb"><div class="d r"></div><div class="d y"></div><div class="d g"></div><div class="tb-t">Agent Trace</div></div>
+  <div class="center" style="padding:48px;">
+    <div class="steps"><div class="step-dot done"></div><div class="step-dot done"></div><div class="step-dot a"></div></div>
+
+    <div class="success-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+
+    <div class="title" style="font-size:16px; margin-bottom:6px;">Listening on port 8888</div>
+    <div style="display:flex;align-items:center;gap:6px;justify-content:center;margin-bottom:24px;">
+      <div class="pulse-dot"></div>
+      <span style="font-size:12px;color:var(--green);font-weight:500;">Waiting for your first request...</span>
+    </div>
+
+    <!-- Guidance steps -->
+    <div style="width:100%;max-width:520px;text-align:left;">
+      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text4);margin-bottom:12px;">Complete setup in 2 steps</div>
+
+      <!-- Step A -->
+      <div style="display:flex;gap:10px;margin-bottom:12px;padding:12px 14px;border:1px solid var(--border);background:var(--surface);">
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:var(--brand);color:white;font-size:10px;font-weight:700;flex-shrink:0;margin-top:1px;">1</span>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:13px;font-weight:500;margin-bottom:6px;">Set the environment variable</div>
+          <div style="display:flex;align-items:center;gap:8px;background:#0a0a0a;border:1px solid var(--border);padding:8px 10px;">
+            <div class="shell-code" style="font-size:11px;flex:1;min-width:0;overflow-x:auto;">export ANTHROPIC_BASE_URL=http://127.0.0.1:8888</div>
+            <button class="copy-btn" style="height:28px;padding:0 10px;font-size:10px;flex-shrink:0;border:1px solid var(--text4);">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              Copy
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step B -->
+      <div style="display:flex;gap:10px;margin-bottom:12px;padding:10px 12px;border:1px solid var(--border);background:var(--surface);">
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:var(--brand);color:white;font-size:10px;font-weight:700;flex-shrink:0;margin-top:1px;">2</span>
+        <div>
+          <div style="font-size:13px;font-weight:500;margin-bottom:4px;">Use Claude Code as usual</div>
+          <div style="font-size:12px;color:var(--text3);line-height:1.5;">
+            Start a conversation with Claude Code. Agent Trace will automatically capture the traffic and open the workspace.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:16px;">
+      <button class="btn-ghost" style="font-size:11px;">Skip to workspace &rarr;</button>
+    </div>
+  </div>
+</div>
+
+<div class="ann">
+  <strong>新增引导态设计要点：</strong><br>
+  1. 绿色 checkmark + 呼吸灯表示 listener 已启动，正在等待。<br>
+  2. 两步引导卡片：设置环境变量 → 正常使用 agent，降低认知负担。<br>
+  3. 当第一个请求到达后自动跳转到 workspace（无需用户操作）。<br>
+  4. 提供 "Skip to workspace" 跳过按钮（for 高级用户 / 已配置过的用户）。
+</div>
+
+<hr>
+
+<!-- ========== INTERACTION SUMMARY ========== -->
+<h2>交互总结</h2>
+
+<table style="width:100%;border-collapse:collapse;font-size:12px;margin-top:12px;">
+  <thead>
+    <tr style="border-bottom:1px solid var(--border);text-align:left;">
+      <th style="padding:10px 0;color:var(--text3);font-weight:600;">Step</th>
+      <th style="padding:10px 0;color:var(--text3);font-weight:600;">用户操作</th>
+      <th style="padding:10px 0;color:var(--text3);font-weight:600;">系统行为</th>
+      <th style="padding:10px 0;color:var(--text3);font-weight:600;">v1 对比</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr style="border-bottom:1px solid var(--border-s);">
+      <td style="padding:10px 0;color:var(--brand);font-weight:600;">1. 选 Provider</td>
+      <td style="padding:10px 0;">点选卡片 → Continue</td>
+      <td style="padding:10px 0;color:var(--text2);">预填默认 URL + 端口</td>
+      <td style="padding:10px 0;color:var(--text3);font-size:11px;">Logo 更新，配色对齐</td>
+    </tr>
+    <tr style="border-bottom:1px solid var(--border-s);">
+      <td style="padding:10px 0;color:var(--brand);font-weight:600;">2. 配置连接</td>
+      <td style="padding:10px 0;">确认/修改 upstream URL → Start</td>
+      <td style="padding:10px 0;color:var(--text2);">创建 profile + 启动 listener</td>
+      <td style="padding:10px 0;color:var(--text3);font-size:11px;">新增三段式流图</td>
+    </tr>
+    <tr>
+      <td style="padding:10px 0;color:var(--brand);font-weight:600;">3. 等待流量</td>
+      <td style="padding:10px 0;">复制 export → 终端执行 → 使用 agent</td>
+      <td style="padding:10px 0;color:var(--text2);">首个请求到达 → 自动进 workspace</td>
+      <td style="padding:10px 0;color:var(--text3);font-size:11px;"><strong>新增</strong>：引导等待态</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="ann" style="margin-top:20px;">
+  <strong>实施注意事项：</strong><br>
+  1. Step 3（等待态）需要监听 proxy 的首次请求事件，通过 IPC push 通知 renderer 自动跳转。<br>
+  2. Logo SVG 已存在于 <code>resources/icon.svg</code>，renderer 可通过 <code>&lt;img&gt;</code> 引入或直接 inline。<br>
+  3. 所有 <code>violet-500</code> / <code>purple-600</code> 引用需替换为 <code>accent-brand</code> token。<br>
+  4. Provider emoji（🟠🟢）→ 使用 <code>profile-switcher.tsx</code> 中已有的 AN/CX badge 模式。
+</div>
+
+</div>
+</body>
+</html>
