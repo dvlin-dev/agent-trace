@@ -6,12 +6,10 @@
 
 **实时捕获、检查和调试 AI Agent 流量**
 
-一个 Electron 桌面应用，部署在 Agent 客户端和上游 Provider 之间，
-将每个请求/响应捕获为结构化、可搜索的 Session Trace。
+拦截和分析 claude code / codex 的 prompt 和工作流设计
 
 [![GitHub Stars](https://img.shields.io/github/stars/dvlin-dev/agent-trace?style=flat)](https://github.com/dvlin-dev/agent-trace)
 [![Release](https://img.shields.io/github/v/release/dvlin-dev/agent-trace?style=flat)](https://github.com/dvlin-dev/agent-trace/releases)
-[![License](https://img.shields.io/github/license/dvlin-dev/agent-trace?style=flat)](LICENSE)
 
 [English](./README.en.md) | [中文](./README.md)
 
