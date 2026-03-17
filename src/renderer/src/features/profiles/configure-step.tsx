@@ -115,7 +115,7 @@ export function ConfigureStep({
               className="font-mono text-xs h-9 text-muted-foreground flex-1"
             />
             <button
-              className="shrink-0 flex items-center gap-1.5 h-9 px-3 border border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground text-[11px] font-medium transition-colors"
+              className="shrink-0 flex items-center gap-1.5 h-9 px-3 border border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground rounded-md text-[11px] font-medium transition-colors"
               onClick={copyAddress}
             >
               {copied ? (

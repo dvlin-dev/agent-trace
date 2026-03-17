@@ -93,7 +93,7 @@ export function ContextChip({
 
   return (
     <div
-      className={cn("border-l-2 cursor-pointer", colors.border, colors.bg)}
+      className={cn("border-l-2 rounded-md cursor-pointer", colors.border, colors.bg)}
       onClick={() => setExpanded(!expanded)}
     >
       <div className={cn("flex items-center gap-1.5 px-3 py-1.5", colors.text)}>

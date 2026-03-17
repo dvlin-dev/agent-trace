@@ -4,6 +4,7 @@ import type {
   ConnectionProfile,
   ExchangeDetailVM,
   ProfileStatusChangedEvent,
+  ProfilesChangedEvent,
   SessionListFilter,
   SessionListItemVM,
   SessionTraceVM,
@@ -92,6 +93,17 @@ export const electronAPI: ElectronAPI = {
     ipcRenderer.on(IPC.PROFILE_STATUS_CHANGED, handler);
     return () =>
       ipcRenderer.removeListener(IPC.PROFILE_STATUS_CHANGED, handler);
+  },
+
+  onProfilesChanged: (
+    cb: (payload: ProfilesChangedEvent) => void,
+  ): (() => void) => {
+    const handler = (
+      _e: Electron.IpcRendererEvent,
+      payload: ProfilesChangedEvent,
+    ) => cb(payload);
+    ipcRenderer.on(IPC.PROFILES_CHANGED, handler);
+    return () => ipcRenderer.removeListener(IPC.PROFILES_CHANGED, handler);
   },
 
   onUpdateStateChanged: (cb: (state: UpdateState) => void): (() => void) => {

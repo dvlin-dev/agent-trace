@@ -10,6 +10,7 @@ export function useProxyEvents() {
   const resetSessions = useSessionStore((s) => s.reset);
   const loadTrace = useTraceStore((state) => state.loadTrace);
   const setStatuses = useProfileStore((state) => state.setStatuses);
+  const setProfiles = useProfileStore((state) => state.setProfiles);
 
   useEffect(() => {
     const api = getElectronAPI();
@@ -29,6 +30,10 @@ export function useProxyEvents() {
       setStatuses(payload.statuses);
     });
 
+    const unsubProfilesChanged = api.onProfilesChanged((payload) => {
+      setProfiles(payload.profiles);
+    });
+
     const unsubError = api.onProxyError((error) => {
       toast.error("Proxy Error", { description: error });
     });
@@ -37,7 +42,8 @@ export function useProxyEvents() {
       unsubCapture();
       unsubReset();
       unsubProfileStatus();
+      unsubProfilesChanged();
       unsubError();
     };
-  }, [loadTrace, resetSessions, setStatuses, upsertSession]);
+  }, [loadTrace, resetSessions, setStatuses, setProfiles, upsertSession]);
 }

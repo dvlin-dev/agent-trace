@@ -97,7 +97,7 @@ export function OtherView() {
         {/* Injected context blocks from messages */}
         {injectedItems.map((item, i) =>
           rawMode ? (
-            <div key={`inj-${i}`} className="p-4 bg-card border border-border space-y-2">
+            <div key={`inj-${i}`} className="p-4 bg-card border border-border rounded-lg space-y-2">
               <span className="text-xs text-muted-foreground font-medium">
                 {item.label}
               </span>
@@ -119,7 +119,7 @@ export function OtherView() {
 
         {/* Extra inspector sections */}
         {inspectorSections.map((section, i) => (
-          <div key={`sec-${i}`} className="bg-card border border-border p-4 space-y-2">
+          <div key={`sec-${i}`} className="bg-card border border-border rounded-lg p-4 space-y-2">
             <div className="text-xs font-medium text-muted-foreground">
               {section.title}
             </div>

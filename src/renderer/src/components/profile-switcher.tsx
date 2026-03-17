@@ -136,7 +136,7 @@ function ProfileRow({ profile, port, isRunning, onToggle, onEdit, onDelete }: Pr
 
   return (
     <div
-      className="group flex items-center gap-2 px-3 py-2.5 border border-border bg-card hover:bg-muted/40 transition-colors"
+      className="group flex items-center gap-2 px-3 py-2.5 border border-border bg-card hover:bg-muted/40 rounded-md transition-colors"
       onMouseEnter={() => setRowHovered(true)}
       onMouseLeave={() => setRowHovered(false)}
     >
@@ -147,35 +147,34 @@ function ProfileRow({ profile, port, isRunning, onToggle, onEdit, onDelete }: Pr
         )}
       />
       <ProviderBadge providerId={profile.providerId} className="shrink-0" />
-      <span className="text-xs font-medium truncate flex-1">{profile.name}</span>
-
-      {/* Edit / Delete — visible on row hover */}
-      <span
-        className={cn(
-          "flex items-center gap-0.5 shrink-0 transition-opacity",
-          rowHovered ? "opacity-100" : "opacity-0",
+      <span className="relative flex-1 min-w-0">
+        <span className={cn("text-xs font-medium truncate block", rowHovered && "invisible")}>
+          {profile.name}
+        </span>
+        {rowHovered && (
+          <span className="absolute inset-0 flex items-center justify-end gap-0.5">
+            <button
+              className="p-0.5 text-muted-foreground hover:text-foreground transition-colors"
+              onClick={(e) => { e.stopPropagation(); onEdit(); }}
+              title="Edit profile"
+            >
+              <Pencil className="h-3 w-3" />
+            </button>
+            <button
+              className="p-0.5 text-muted-foreground hover:text-red-400 transition-colors"
+              onClick={(e) => { e.stopPropagation(); onDelete(); }}
+              title="Delete profile"
+            >
+              <Trash2 className="h-3 w-3" />
+            </button>
+          </span>
         )}
-      >
-        <button
-          className="p-0.5 text-muted-foreground hover:text-foreground transition-colors"
-          onClick={(e) => { e.stopPropagation(); onEdit(); }}
-          title="Edit profile"
-        >
-          <Pencil className="h-3 w-3" />
-        </button>
-        <button
-          className="p-0.5 text-muted-foreground hover:text-red-400 transition-colors"
-          onClick={(e) => { e.stopPropagation(); onDelete(); }}
-          title="Delete profile"
-        >
-          <Trash2 className="h-3 w-3" />
-        </button>
       </span>
 
       <span className="text-xs font-mono text-muted-foreground shrink-0">:{port}</span>
       <button
         className={cn(
-          "text-xs px-2 py-0.5 border shrink-0 min-w-[56px] text-center transition-all",
+          "text-xs px-2 py-0.5 border shrink-0 w-[68px] text-center rounded-sm transition-all",
           isRunning
             ? hovered
               ? "text-destructive border-destructive/30 bg-destructive/10"

@@ -13,7 +13,7 @@ export function DataFlowDiagram({ clientName, localPort, upstreamUrl }: DataFlow
   return (
     <div className="flex items-stretch w-full max-w-[500px] text-[11px]">
       {/* Client node */}
-      <div className="flex-1 border border-border bg-card p-2.5 text-center">
+      <div className="flex-1 border border-border bg-card rounded-md p-2.5 text-center">
         <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-0.5">
           Your Client
         </div>
@@ -28,7 +28,7 @@ export function DataFlowDiagram({ clientName, localPort, upstreamUrl }: DataFlow
       </div>
 
       {/* Agent Trace node (highlighted) */}
-      <div className="flex-1 border border-accent-brand bg-accent-brand-muted p-2.5 text-center">
+      <div className="flex-1 border border-accent-brand bg-accent-brand-muted rounded-md p-2.5 text-center">
         <div className="text-[10px] font-semibold uppercase tracking-wider text-accent-brand/60 mb-0.5">
           Agent Trace
         </div>
@@ -43,7 +43,7 @@ export function DataFlowDiagram({ clientName, localPort, upstreamUrl }: DataFlow
       </div>
 
       {/* Upstream node */}
-      <div className="flex-1 border border-border bg-card p-2.5 text-center">
+      <div className="flex-1 border border-border bg-card rounded-md p-2.5 text-center">
         <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-0.5">
           Upstream API
         </div>

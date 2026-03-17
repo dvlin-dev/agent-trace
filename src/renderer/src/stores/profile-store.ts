@@ -15,6 +15,7 @@ interface ProfileState {
   startProfile: (profileId: string) => Promise<void>;
   stopProfile: (profileId: string) => Promise<void>;
   setStatuses: (statuses: ProfileStatuses) => void;
+  setProfiles: (profiles: ConnectionProfile[]) => void;
 }
 
 export const useProfileStore = create<ProfileState>((set, get) => ({
@@ -77,5 +78,9 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
 
   setStatuses: (statuses) => {
     set({ statuses });
+  },
+
+  setProfiles: (profiles) => {
+    set({ profiles });
   },
 }));
