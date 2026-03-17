@@ -16,7 +16,7 @@ export function ProviderBadge({ providerId, className }: ProviderBadgeProps) {
   return (
     <span
       className={cn(
-        "inline-flex items-center justify-center text-[11px] font-bold px-1",
+        "inline-flex items-center justify-center rounded-sm text-[11px] font-bold px-1",
         badge.className,
         className,
       )}

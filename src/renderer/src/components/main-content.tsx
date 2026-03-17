@@ -16,6 +16,7 @@ import { useSessionStore } from "../stores/session-store";
 import { useTraceStore } from "../stores/trace-store";
 import { useProfileStore } from "../stores/profile-store";
 import { PROVIDERS } from "../features/profiles/constants";
+import { cn } from "../lib/utils";
 
 function WaitingGuide() {
   const profiles = useProfileStore((s) => s.profiles);
@@ -65,13 +66,13 @@ function WaitingGuide() {
               </span>
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-medium mb-2">Set the environment variable</div>
-                <div className="border border-border bg-[#0a0a0a] p-2.5">
+                <div className="border border-border bg-[#0a0a0a] p-2.5 rounded-md">
                   <div className="flex items-center gap-2">
                     <code className="text-xs text-success font-mono flex-1 min-w-0 overflow-x-auto">
                       {exportCmd}
                     </code>
                     <button
-                      className="shrink-0 flex items-center gap-1 text-[11px] text-neutral-400 hover:text-neutral-200 px-2 py-1 border border-neutral-700 bg-neutral-800 transition-colors"
+                      className="shrink-0 flex items-center gap-1 text-[11px] text-neutral-400 hover:text-neutral-200 px-2 py-1 border border-neutral-700 bg-neutral-800 rounded-sm transition-colors"
                       onClick={handleCopy}
                     >
                       {copied ? (
@@ -136,10 +137,10 @@ export function MainContent() {
 
   const contentArea = (
     <>
-      {contentTab === "messages" && <ConversationView />}
-      {contentTab === "system" && <SystemView />}
-      {contentTab === "tools" && <ToolsView />}
-      {contentTab === "other" && <OtherView />}
+      <div className={cn("h-full", contentTab !== "messages" && "hidden")}><ConversationView /></div>
+      <div className={cn("h-full", contentTab !== "system" && "hidden")}><SystemView /></div>
+      <div className={cn("h-full", contentTab !== "tools" && "hidden")}><ToolsView /></div>
+      <div className={cn("h-full", contentTab !== "other" && "hidden")}><OtherView /></div>
     </>
   );
 
@@ -149,11 +150,11 @@ export function MainContent() {
         <ConversationHeader />
         <ContentTabBar />
         <ResizablePanelGroup orientation="horizontal" className="flex-1">
-          <ResizablePanel defaultSize="50%" minSize="25%">
+          <ResizablePanel defaultSize="65%" minSize="40%">
             {contentArea}
           </ResizablePanel>
           <ResizableHandle />
-          <ResizablePanel defaultSize="50%" minSize="25%">
+          <ResizablePanel defaultSize="35%" minSize="25%">
             <InspectorPanel />
           </ResizablePanel>
         </ResizablePanelGroup>

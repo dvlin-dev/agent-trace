@@ -30,7 +30,7 @@ export function RequestItem({ request, isSelected, onClick }: RequestItemProps) 
   return (
     <button
       className={cn(
-        "w-full text-left px-3 py-2 transition-colors duration-150",
+        "w-full text-left px-3 py-2 transition-colors duration-150 rounded-md",
         "hover:bg-muted/50",
         isSelected && "bg-accent-brand-muted",
       )}

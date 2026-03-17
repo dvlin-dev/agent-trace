@@ -4,6 +4,7 @@ import { ArrowUp, ArrowDown } from "lucide-react";
 import { cn } from "../lib/utils";
 import type { SessionTimeline } from "../../../shared/contracts";
 import { useTraceStore } from "../stores/trace-store";
+import { useSessionStore } from "../stores/session-store";
 
 const SCROLL_THRESHOLD = 120;
 
@@ -15,6 +16,7 @@ interface ConversationViewProps {
 export function ConversationView({ timeline, rawMode }: ConversationViewProps) {
   const storeTrace = useTraceStore((state) => state.trace);
   const storeRawMode = useTraceStore((state) => state.rawMode);
+  const selectedSessionId = useSessionStore((s) => s.selectedSessionId);
   const activeTimeline = timeline ?? storeTrace?.timeline ?? { messages: [] };
   const activeRawMode = rawMode ?? storeRawMode;
   const messages = activeTimeline.messages;
@@ -24,15 +26,67 @@ export function ConversationView({ timeline, rawMode }: ConversationViewProps) {
   const [showBottom, setShowBottom] = useState(false);
   const [hasNew, setHasNew] = useState(false);
   const prevCountRef = useRef(messages.length);
+  const scrollCache = useRef<Map<string, number>>(new Map());
+  const prevSessionRef = useRef<string | null>(null);
+  const scrollListenerAttached = useRef(false);
 
   const updateButtons = useCallback(() => {
     const el = viewportRef.current;
     if (!el) return;
     const { scrollTop, scrollHeight, clientHeight } = el;
-    setShowTop(scrollTop > SCROLL_THRESHOLD);
+    const isScrollable = scrollHeight > clientHeight + 1;
+    setShowTop(isScrollable && scrollTop > SCROLL_THRESHOLD);
     const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
-    setShowBottom(distanceFromBottom > SCROLL_THRESHOLD);
+    setShowBottom(isScrollable && distanceFromBottom > SCROLL_THRESHOLD);
   }, []);
+
+  // Ref callback to setup scroll listener once
+  const setViewportRef = useCallback((el: HTMLDivElement | null) => {
+    // Cleanup old listener if ref changes
+    if (viewportRef.current && scrollListenerAttached.current) {
+      viewportRef.current.removeEventListener("scroll", handleScroll);
+      scrollListenerAttached.current = false;
+    }
+
+    viewportRef.current = el;
+
+    if (el && !scrollListenerAttached.current) {
+      el.addEventListener("scroll", handleScroll, { passive: true });
+      scrollListenerAttached.current = true;
+      requestAnimationFrame(updateButtons);
+    }
+  }, [updateButtons]);
+
+  const handleScroll = useCallback(() => {
+    updateButtons();
+    const el = viewportRef.current;
+    if (!el) return;
+    const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+    if (distanceFromBottom <= SCROLL_THRESHOLD) {
+      setHasNew(false);
+    }
+  }, [updateButtons]);
+
+  // Save/restore scroll position on session switch
+  useEffect(() => {
+    const el = viewportRef.current;
+    if (prevSessionRef.current && el) {
+      scrollCache.current.set(prevSessionRef.current, el.scrollTop);
+    }
+    if (selectedSessionId && el) {
+      const saved = scrollCache.current.get(selectedSessionId);
+      requestAnimationFrame(() => {
+        el.scrollTo({ top: saved ?? 0 });
+        updateButtons();
+      });
+    }
+    prevSessionRef.current = selectedSessionId ?? null;
+  }, [selectedSessionId, updateButtons]);
+
+  // Recalculate buttons when content changes
+  useEffect(() => {
+    requestAnimationFrame(updateButtons);
+  }, [messages.length, updateButtons]);
 
   // Detect new messages while not at bottom
   useEffect(() => {
@@ -48,41 +102,28 @@ export function ConversationView({ timeline, rawMode }: ConversationViewProps) {
     prevCountRef.current = messages.length;
   }, [messages.length]);
 
-  // Attach scroll listener to the viewport
+  // Watch for element size changes (visibility, content loading, etc.)
   useEffect(() => {
     const el = viewportRef.current;
     if (!el) return;
-    const onScroll = () => {
+    const resizeObserver = new ResizeObserver(() => {
       updateButtons();
-      // Clear new indicator when scrolled to bottom
-      const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
-      if (distanceFromBottom <= SCROLL_THRESHOLD) {
-        setHasNew(false);
-      }
-    };
-    el.addEventListener("scroll", onScroll, { passive: true });
-    updateButtons();
-    return () => el.removeEventListener("scroll", onScroll);
-  }, [updateButtons]);
-
-  // Grab the viewport element from radix ScrollArea
-  const containerRef = useCallback((node: HTMLDivElement | null) => {
-    if (node) {
-      const viewport = node.querySelector("[data-slot='scroll-area-viewport']");
-      viewportRef.current = viewport as HTMLDivElement | null;
-      updateButtons();
-    }
+    });
+    resizeObserver.observe(el);
+    return () => resizeObserver.disconnect();
   }, [updateButtons]);
 
   const scrollToTop = () => {
-    viewportRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+    viewportRef.current?.scrollTo({ top: 0 });
+    requestAnimationFrame(updateButtons);
   };
 
   const scrollToBottom = () => {
     const el = viewportRef.current;
     if (el) {
-      el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+      el.scrollTo({ top: el.scrollHeight });
       setHasNew(false);
+      requestAnimationFrame(updateButtons);
     }
   };
 
@@ -95,8 +136,8 @@ export function ConversationView({ timeline, rawMode }: ConversationViewProps) {
   }
 
   return (
-    <div className="relative h-full" ref={containerRef}>
-      <div className="h-full overflow-auto" ref={(el) => { viewportRef.current = el; }}>
+    <div className="relative h-full">
+      <div className="h-full overflow-auto" ref={setViewportRef}>
         <div className="space-y-3 p-6 max-w-4xl mx-auto">
           {messages.map((msg, i) => (
             <MessageBlock
@@ -108,29 +149,29 @@ export function ConversationView({ timeline, rawMode }: ConversationViewProps) {
         </div>
       </div>
 
-      {/* Scroll to top */}
-      {showTop && (
-        <button
-          className="absolute top-3 right-4 z-10 flex items-center gap-1 px-2.5 py-1.5 text-xs bg-card border border-border shadow-sm hover:bg-accent transition-colors"
-          onClick={scrollToTop}
-        >
-          <ArrowUp className="h-3 w-3" />
-          Top
-        </button>
-      )}
-
-      {/* Scroll to latest */}
-      {showBottom && (
-        <button
-          className="absolute bottom-3 right-4 z-10 flex items-center gap-1 px-2.5 py-1.5 text-xs bg-card border border-border shadow-sm hover:bg-accent transition-colors"
-          onClick={scrollToBottom}
-        >
-          <ArrowDown className="h-3 w-3" />
-          Latest
-          {hasNew && (
-            <span className="ml-1 h-1.5 w-1.5 rounded-full bg-accent-brand animate-pulse" />
+      {/* Scroll navigation */}
+      {(showTop || showBottom) && (
+        <div className="absolute bottom-3 right-4 z-10 flex flex-col gap-1">
+          {showTop && (
+            <button
+              className="flex items-center justify-center h-7 w-7 bg-card border border-border shadow-sm hover:bg-accent transition-colors rounded-sm"
+              onClick={scrollToTop}
+            >
+              <ArrowUp className="h-3.5 w-3.5" />
+            </button>
           )}
-        </button>
+          {showBottom && (
+            <button
+              className="relative flex items-center justify-center h-7 w-7 bg-card border border-border shadow-sm hover:bg-accent transition-colors rounded-sm"
+              onClick={scrollToBottom}
+            >
+              <ArrowDown className="h-3.5 w-3.5" />
+              {hasNew && (
+                <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-accent-brand animate-pulse" />
+              )}
+            </button>
+          )}
+        </div>
       )}
     </div>
   );

@@ -22,7 +22,7 @@ function ToolItem({ tool, rawMode }: { tool: NormalizedTool; rawMode: boolean })
 
   if (rawMode) {
     return (
-      <div className="p-4 bg-card border border-border">
+      <div className="p-4 bg-card border border-border rounded-lg">
         <pre className="text-xs font-mono whitespace-pre-wrap break-all overflow-auto">
           {JSON.stringify(tool, null, 2)}
         </pre>
@@ -31,7 +31,7 @@ function ToolItem({ tool, rawMode }: { tool: NormalizedTool; rawMode: boolean })
   }
 
   return (
-    <div className="bg-card border border-border">
+    <div className="bg-card border border-border rounded-lg">
       <div
         className="flex items-center gap-2 px-4 py-3 cursor-pointer hover:bg-accent/30 transition-colors"
         onClick={() => setExpanded(!expanded)}

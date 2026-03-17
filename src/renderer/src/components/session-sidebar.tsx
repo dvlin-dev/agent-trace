@@ -117,7 +117,7 @@ export function SessionSidebar() {
             <button
               key={tab.label}
               className={cn(
-                "px-2.5 py-1 text-xs font-medium transition-colors",
+                "px-2.5 py-1 text-xs font-medium transition-colors rounded-md",
                 providerFilter === tab.value
                   ? "bg-accent-brand-muted text-accent-brand"
                   : "text-muted-foreground hover:bg-muted hover:text-foreground",

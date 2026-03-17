@@ -112,7 +112,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                   return (
                     <div
                       key={profile.id}
-                      className="flex items-center gap-2 border border-border p-2"
+                      className="flex items-center gap-2 border border-border p-2 rounded-md"
                     >
                       <div
                         className={cn(
@@ -169,7 +169,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
               <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
                 Updates
               </div>
-              <div className="flex items-center gap-3 border border-border p-2.5">
+              <div className="flex items-center gap-3 border border-border p-2.5 rounded-md">
                 <div className="flex-1">
                   <div className="text-xs font-medium">
                     Version {updateState.currentVersion || "unknown"}
@@ -208,7 +208,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
               </div>
               <div className="space-y-1.5">
                 <button
-                  className="flex items-center gap-2 w-full text-left border border-border p-2.5 hover:bg-muted/50 transition-colors"
+                  className="flex items-center gap-2 w-full text-left border border-border p-2.5 hover:bg-muted/50 rounded-md transition-colors"
                   onClick={() => void window.electronAPI.openExternal("https://github.com/dvlin-dev/agent-trace")}
                 >
                   <Github className="h-4 w-4 shrink-0" />
@@ -219,7 +219,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                   <ExternalLink className="h-3 w-3 text-muted-foreground shrink-0" />
                 </button>
                 <button
-                  className="flex items-center gap-2 w-full text-left border border-accent-brand/30 bg-accent-brand-muted p-2.5 hover:bg-accent-brand/15 transition-colors"
+                  className="flex items-center gap-2 w-full text-left border border-accent-brand/30 bg-accent-brand-muted p-2.5 hover:bg-accent-brand/15 rounded-md transition-colors"
                   onClick={() => void window.electronAPI.openExternal("https://moryflow.com")}
                 >
                   <Sparkles className="h-4 w-4 shrink-0 text-accent-brand" />

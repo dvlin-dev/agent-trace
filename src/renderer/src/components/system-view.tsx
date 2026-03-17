@@ -39,7 +39,7 @@ export function SystemView() {
   return (
     <ScrollArea className="h-full">
       <div className="space-y-3 p-6 max-w-4xl mx-auto">
-        <div className="bg-card border border-border p-4 overflow-visible">
+        <div className="bg-card border border-border rounded-lg p-4 overflow-visible">
           {rawMode ? (
             <pre className="text-sm whitespace-pre-wrap break-words font-mono">
               {text}

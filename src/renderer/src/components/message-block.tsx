@@ -54,7 +54,7 @@ function CopyButton({ text }: { text: string }) {
 
   return (
     <button
-      className="p-1 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+      className="p-1 text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors"
       onClick={handleCopy}
       title="Copy to clipboard"
     >
@@ -107,7 +107,7 @@ export function MessageBlock({ message, rawMode }: MessageBlockProps) {
 
   if (rawMode) {
     return (
-      <div className="p-4 space-y-2 relative group bg-card border border-border">
+      <div className="p-4 space-y-2 relative group bg-card border border-border rounded-lg">
         <div className="flex items-center justify-between">
           <span className="flex items-center gap-1.5 text-xs">
             <span className={cn("inline-block h-1.5 w-1.5 rounded-full", roleDotColor(message.role))} />
@@ -135,7 +135,7 @@ export function MessageBlock({ message, rawMode }: MessageBlockProps) {
   return (
     <div
       className={cn(
-        "p-4 space-y-2 relative group bg-card border border-border transition-colors",
+        "p-4 space-y-2 relative group bg-card border border-border rounded-lg transition-colors",
         !expanded && "cursor-pointer hover:bg-accent/30"
       )}
       onClick={!expanded ? () => setExpanded(true) : undefined}

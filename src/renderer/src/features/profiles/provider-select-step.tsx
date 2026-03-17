@@ -42,7 +42,7 @@ export function ProviderSelectStep({ selectedId, onSelect, onNext }: ProviderSel
                 key={provider.id}
                 onClick={() => onSelect(provider.id)}
                 className={cn(
-                  "relative w-[200px] p-4 border text-left transition-all",
+                  "relative w-[200px] p-4 border rounded-lg text-left transition-all",
                   isSelected
                     ? "border-accent-brand bg-accent-brand-muted shadow-sm"
                     : "border-border hover:border-muted-foreground/30",
@@ -58,7 +58,7 @@ export function ProviderSelectStep({ selectedId, onSelect, onNext }: ProviderSel
                 {/* Badge */}
                 <div
                   className={cn(
-                    "w-7 h-7 flex items-center justify-center text-xs font-bold mb-2.5 tracking-wide",
+                    "w-7 h-7 flex items-center justify-center rounded-md text-xs font-bold mb-2.5 tracking-wide",
                     provider.badgeVariant === "brand"
                       ? "bg-accent-brand-muted text-accent-brand"
                       : "bg-success-muted text-success",

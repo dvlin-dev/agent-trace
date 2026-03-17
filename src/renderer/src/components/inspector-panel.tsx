@@ -67,7 +67,7 @@ export function InspectorPanel({
           <button
             key={id}
             className={cn(
-              "px-2 py-1 text-xs whitespace-nowrap transition-colors",
+              "px-2 py-1 text-xs whitespace-nowrap transition-colors rounded-md",
               activeTab === id
                 ? "bg-accent text-accent-foreground font-medium"
                 : "text-muted-foreground hover:text-foreground hover:bg-accent/50",
