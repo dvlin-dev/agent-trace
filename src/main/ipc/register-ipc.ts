@@ -87,6 +87,11 @@ export function registerIpcHandlers(deps: IpcDependencies): () => void {
     }
 
     await deps.proxyManager.startProfile(profileId);
+
+    const profiles = deps.profileStore.getProfiles();
+    const updated = profiles.map((p) => p.id === profileId ? { ...p, autoStart: true } : p);
+    deps.profileStore.saveProfiles(updated);
+
     broadcast(deps.getMainWindow, IPC.PROFILE_STATUS_CHANGED, {
       statuses: deps.proxyManager.getStatuses(),
     });
@@ -98,6 +103,11 @@ export function registerIpcHandlers(deps: IpcDependencies): () => void {
     }
 
     await deps.proxyManager.stopProfile(profileId);
+
+    const profiles = deps.profileStore.getProfiles();
+    const updated = profiles.map((p) => p.id === profileId ? { ...p, autoStart: false } : p);
+    deps.profileStore.saveProfiles(updated);
+
     broadcast(deps.getMainWindow, IPC.PROFILE_STATUS_CHANGED, {
       statuses: deps.proxyManager.getStatuses(),
     });
