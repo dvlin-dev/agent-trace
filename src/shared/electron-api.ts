@@ -2,6 +2,7 @@ import type {
   ConnectionProfile,
   ExchangeDetailVM,
   ProfileStatusChangedEvent,
+  ProfilesChangedEvent,
   SessionListFilter,
   SessionListItemVM,
   SessionTraceVM,
@@ -33,5 +34,6 @@ export interface ElectronAPI {
   onProfileStatusChanged(
     cb: (payload: ProfileStatusChangedEvent) => void,
   ): () => void;
+  onProfilesChanged(cb: (payload: ProfilesChangedEvent) => void): () => void;
   onUpdateStateChanged(cb: (state: UpdateState) => void): () => void;
 }

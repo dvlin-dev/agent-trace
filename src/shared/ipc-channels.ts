@@ -17,5 +17,6 @@ export const IPC = {
   TRACE_CAPTURED: "trace:captured",
   TRACE_RESET: "trace:reset",
   PROFILE_STATUS_CHANGED: "profiles:status-changed",
+  PROFILES_CHANGED: "profiles:changed",
   UPDATE_STATE_CHANGED: "app:update-state-changed",
 } as const;
