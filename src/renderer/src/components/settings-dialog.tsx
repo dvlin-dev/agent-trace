@@ -4,6 +4,9 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogClose,
 } from "./ui/dialog";
 import { Button } from "./ui/button";
 import { useAppStore } from "../stores/app-store";
@@ -12,7 +15,8 @@ import { useSessionStore } from "../stores/session-store";
 import { ProfileForm } from "../features/profiles/profile-form";
 import { cn } from "../lib/utils";
 import { toast } from "sonner";
-import { Github, ExternalLink, Trash2, Sparkles } from "lucide-react";
+import { Github, ExternalLink, Trash2, Sparkles, Pencil } from "lucide-react";
+import type { ConnectionProfile } from "../../../shared/contracts";
 
 interface SettingsDialogProps {
   open: boolean;
@@ -26,10 +30,12 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
     downloadUpdate,
     quitAndInstallUpdate,
   } = useAppStore();
-  const { profiles, statuses, initialized, initialize, startProfile, stopProfile, upsertProfile } =
+  const { profiles, statuses, initialized, initialize, startProfile, stopProfile, upsertProfile, deleteProfile } =
     useProfileStore();
   const clearHistory = useSessionStore((s) => s.clearHistory);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [editingProfile, setEditingProfile] = useState<ConnectionProfile | null>(null);
+  const [deletingProfile, setDeletingProfile] = useState<ConnectionProfile | null>(null);
 
   useEffect(() => {
     if (!open || initialized) return;
@@ -111,10 +117,13 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
               <div className="space-y-1">
                 {profiles.map((profile) => {
                   const isRunning = statuses[profile.id]?.isRunning ?? false;
+                  const [rowHovered, setRowHovered] = useState(false);
                   return (
                     <div
                       key={profile.id}
-                      className="flex items-center gap-2 border border-border p-2 rounded-md"
+                      className="flex items-center gap-2 border border-border p-2 rounded-md hover:bg-muted/40 transition-colors"
+                      onMouseEnter={() => setRowHovered(true)}
+                      onMouseLeave={() => setRowHovered(false)}
                     >
                       <div
                         className={cn(
@@ -128,6 +137,24 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                           {profile.upstreamBaseUrl}
                         </div>
                       </div>
+                      {rowHovered && (
+                        <div className="flex items-center gap-0.5 shrink-0">
+                          <button
+                            className="p-0.5 text-muted-foreground hover:text-foreground transition-colors"
+                            onClick={(e) => { e.stopPropagation(); setEditingProfile(profile); }}
+                            title="Edit profile"
+                          >
+                            <Pencil className="h-3 w-3" />
+                          </button>
+                          <button
+                            className="p-0.5 text-muted-foreground hover:text-red-400 transition-colors"
+                            onClick={(e) => { e.stopPropagation(); setDeletingProfile(profile); }}
+                            title="Delete profile"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </button>
+                        </div>
+                      )}
                       <span className="text-[11px] font-mono text-muted-foreground flex-shrink-0">
                         :{profile.localPort}
                       </span>
@@ -235,6 +262,61 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
             </div>
           </div>
         )}
+
+        {/* Edit Profile Dialog */}
+        <Dialog open={editingProfile !== null} onOpenChange={(open) => !open && setEditingProfile(null)}>
+          <DialogContent>
+            {editingProfile && (
+              <ProfileForm
+                initialProfile={editingProfile}
+                submitLabel="Save"
+                onSubmit={async (updated) => {
+                  await upsertProfile(updated);
+                  setEditingProfile(null);
+                  toast.success("Profile updated");
+                }}
+              />
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog open={deletingProfile !== null} onOpenChange={(open) => !open && setDeletingProfile(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Delete {deletingProfile?.name}?</DialogTitle>
+              <DialogDescription>
+                This will stop the proxy and remove this profile permanently.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button variant="outline" size="sm">Cancel</Button>
+              </DialogClose>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={async () => {
+                  if (!deletingProfile) return;
+                  try {
+                    if (statuses[deletingProfile.id]?.isRunning) {
+                      await stopProfile(deletingProfile.id);
+                    }
+                    await deleteProfile(deletingProfile.id);
+                    setDeletingProfile(null);
+                    toast.success("Profile deleted");
+                  } catch (error) {
+                    toast.error("Delete failed", {
+                      description: error instanceof Error ? error.message : String(error),
+                    });
+                  }
+                }}
+              >
+                Delete
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </DialogContent>
     </Dialog>
   );
