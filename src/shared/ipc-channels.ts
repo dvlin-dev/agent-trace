@@ -1,4 +1,5 @@
 export const IPC = {
+  OPEN_EXTERNAL: "app:open-external",
   GET_PROFILES: "profiles:get",
   SAVE_PROFILES: "profiles:save",
   START_PROFILE: "profiles:start",

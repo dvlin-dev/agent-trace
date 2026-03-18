@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, shell } from "electron";
 import { join } from "path";
 import { registerIpcHandlers } from "./ipc/register-ipc";
 import { IPC } from "../shared/ipc-channels";
@@ -10,6 +10,41 @@ let appBootstrap: AppBootstrap | null = null;
 let disposeIpcHandlers: (() => void) | null = null;
 let disposeUpdateService: (() => void) | null = null;
 let profilesStarted = false;
+
+function getExternalNavigationTarget(
+  currentUrl: string,
+  nextUrl: string,
+): string | null {
+  let target: URL;
+  try {
+    target = new URL(nextUrl);
+  } catch {
+    return null;
+  }
+
+  if (!["http:", "https:", "mailto:"].includes(target.protocol)) {
+    return null;
+  }
+
+  if (target.protocol === "mailto:") {
+    return target.toString();
+  }
+
+  if (!currentUrl) {
+    return target.toString();
+  }
+
+  try {
+    const current = new URL(currentUrl);
+    if (current.origin === target.origin) {
+      return null;
+    }
+  } catch {
+    return target.toString();
+  }
+
+  return target.toString();
+}
 
 function broadcastProfileStatuses(): void {
   if (!mainWindow || !appBootstrap) return;
@@ -38,6 +73,32 @@ function createWindow(): void {
   // so the renderer always sees the correct running state.
   mainWindow.webContents.on("did-finish-load", () => {
     broadcastProfileStatuses();
+  });
+
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    const target = getExternalNavigationTarget(
+      mainWindow?.webContents.getURL() ?? "",
+      url,
+    );
+    if (target) {
+      void shell.openExternal(target);
+      return { action: "deny" };
+    }
+
+    return { action: "allow" };
+  });
+
+  mainWindow.webContents.on("will-navigate", (event, url) => {
+    const target = getExternalNavigationTarget(
+      mainWindow?.webContents.getURL() ?? "",
+      url,
+    );
+    if (!target) {
+      return;
+    }
+
+    event.preventDefault();
+    void shell.openExternal(target);
   });
 
   if (process.env.ELECTRON_RENDERER_URL) {

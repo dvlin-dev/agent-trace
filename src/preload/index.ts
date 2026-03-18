@@ -1,4 +1,4 @@
-import { contextBridge, ipcRenderer, shell } from "electron";
+import { contextBridge, ipcRenderer } from "electron";
 import { IPC } from "../shared/ipc-channels";
 import type {
   ConnectionProfile,
@@ -16,7 +16,7 @@ import type { UpdateState } from "../shared/update";
 
 export const electronAPI: ElectronAPI = {
   openExternal: (url: string): Promise<void> =>
-    shell.openExternal(url),
+    ipcRenderer.invoke(IPC.OPEN_EXTERNAL, url),
 
   getProfiles: (): Promise<ConnectionProfile[]> =>
     ipcRenderer.invoke(IPC.GET_PROFILES),

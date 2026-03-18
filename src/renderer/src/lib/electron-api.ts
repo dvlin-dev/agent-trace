@@ -7,6 +7,7 @@ export function getElectronAPI(): ElectronAPI {
   }
 
   const requiredMethods: Array<keyof ElectronAPI> = [
+    "openExternal",
     "getProfiles",
     "saveProfiles",
     "startProfile",

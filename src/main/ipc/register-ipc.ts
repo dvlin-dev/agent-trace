@@ -1,4 +1,4 @@
-import { ipcMain, type BrowserWindow } from "electron";
+import { ipcMain, shell, type BrowserWindow } from "electron";
 import { IPC } from "../../shared/ipc-channels";
 import type {
   ConnectionProfile,
@@ -35,7 +35,30 @@ function broadcast(
   win.webContents.send(channel, payload);
 }
 
+function validateExternalUrl(input: string): string {
+  if (typeof input !== "string") {
+    throw new Error("Invalid external URL");
+  }
+
+  let parsed: URL;
+  try {
+    parsed = new URL(input);
+  } catch {
+    throw new Error("Invalid external URL");
+  }
+
+  if (!["http:", "https:", "mailto:"].includes(parsed.protocol)) {
+    throw new Error("Unsupported external URL protocol");
+  }
+
+  return parsed.toString();
+}
+
 export function registerIpcHandlers(deps: IpcDependencies): () => void {
+  ipcMain.handle(IPC.OPEN_EXTERNAL, async (_event, url: string) => {
+    await shell.openExternal(validateExternalUrl(url));
+  });
+
   ipcMain.handle(IPC.GET_PROFILES, () => {
     return deps.profileStore.getProfiles();
   });

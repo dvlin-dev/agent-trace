@@ -3,15 +3,20 @@ import { IPC } from "../../src/shared/ipc-channels";
 
 const handleMock = vi.fn();
 const sendMock = vi.fn();
+const openExternalMock = vi.fn();
 
 vi.mock("electron", () => ({
   ipcMain: {
     handle: handleMock,
   },
+  shell: {
+    openExternal: openExternalMock,
+  },
 }));
 
 describe("IPC Channels", () => {
   it("defines all required channels", () => {
+    expect(IPC.OPEN_EXTERNAL).toBe("app:open-external");
     expect(IPC.GET_PROFILES).toBe("profiles:get");
     expect(IPC.SAVE_PROFILES).toBe("profiles:save");
     expect(IPC.START_PROFILE).toBe("profiles:start");
@@ -49,6 +54,7 @@ describe("registerIpcHandlers", () => {
   beforeEach(() => {
     handleMock.mockReset();
     sendMock.mockReset();
+    openExternalMock.mockReset();
   });
 
   it("registers profile-aware handlers and broadcasts status changes", async () => {
@@ -112,6 +118,10 @@ describe("registerIpcHandlers", () => {
     });
 
     expect(handleMock).toHaveBeenCalledWith(
+      IPC.OPEN_EXTERNAL,
+      expect.any(Function),
+    );
+    expect(handleMock).toHaveBeenCalledWith(
       IPC.GET_PROFILES,
       expect.any(Function),
     );
@@ -160,6 +170,52 @@ describe("registerIpcHandlers", () => {
         },
       },
     });
+  });
+
+  it("opens validated external URLs via the system browser", async () => {
+    const { registerIpcHandlers } = await import(
+      "../../src/main/ipc/register-ipc"
+    );
+
+    openExternalMock.mockResolvedValue("");
+
+    registerIpcHandlers({
+      profileStore: {
+        getProfiles: vi.fn(),
+        saveProfiles: vi.fn(),
+      } as never,
+      proxyManager: {
+        startProfile: vi.fn(),
+        stopProfile: vi.fn(),
+        getStatuses: vi.fn().mockReturnValue({}),
+      } as never,
+      sessionQueryService: {
+        listSessions: vi.fn(),
+        getSessionTrace: vi.fn(),
+      } as never,
+      exchangeQueryService: {
+        getExchangeDetail: vi.fn(),
+      } as never,
+      clearHistory: vi.fn(),
+      getMainWindow: () => null,
+      updateService: {
+        getState: vi.fn(),
+        checkForUpdates: vi.fn(),
+        downloadUpdate: vi.fn(),
+        quitAndInstall: vi.fn(),
+        subscribe: vi.fn(() => () => {}),
+      } as never,
+    });
+
+    const openExternalHandler = handleMock.mock.calls.find(
+      ([channel]) => channel === IPC.OPEN_EXTERNAL,
+    )?.[1];
+
+    await openExternalHandler?.({}, "https://github.com/dvlin-dev/agent-trace");
+
+    expect(openExternalMock).toHaveBeenCalledWith(
+      "https://github.com/dvlin-dev/agent-trace",
+    );
   });
 
   it("restarts a running profile after saving changed profile settings", async () => {
