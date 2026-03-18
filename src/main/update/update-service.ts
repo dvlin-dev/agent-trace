@@ -102,7 +102,7 @@ export function createUpdateService({
   isPackaged = false,
 }: CreateUpdateServiceOptions): UpdateService {
   const listeners = new Set<(state: UpdateState) => void>();
-  const supported = platform === "darwin" && isPackaged;
+  const supported = (platform === "darwin" || platform === "win32") && isPackaged;
   let state = createDefaultUpdateState(
     currentVersion,
     supported ? null : UNSUPPORTED_AUTO_UPDATE_MESSAGE,

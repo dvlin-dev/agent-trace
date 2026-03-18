@@ -8,36 +8,56 @@ interface MarkdownRendererProps {
   className?: string;
 }
 
-function addXmlIndentation(text: string): string {
+function normalizeXmlContent(text: string): string {
   const lines = text.split('\n');
   const result: string[] = [];
-  let depth = 0;
+  let xmlDepth = 0;
+  let inXmlBlock = false;
 
   for (const line of lines) {
     const trimmed = line.trim();
 
-    // Skip empty lines
-    if (!trimmed) {
-      result.push('');
-      continue;
+    // Detect XML tags
+    const hasOpenTag = /<[\w-]+>/.test(trimmed);
+    const hasCloseTag = /<\/[\w-]+>/.test(trimmed);
+    const isStandaloneOpenTag = /^<[\w-]+>$/.test(trimmed);
+    const isStandaloneCloseTag = /^<\/[\w-]+>$/.test(trimmed);
+
+    // Track if we're inside an XML block
+    if (hasOpenTag || hasCloseTag) {
+      inXmlBlock = true;
     }
 
-    // Check if line is an XML tag
-    const isClosingTag = /^<\/[\w-]+>$/.test(trimmed);
-    const isOpeningTag = /^<[\w-]+>$/.test(trimmed);
+    // For lines inside XML blocks, normalize indentation
+    if (inXmlBlock) {
+      // Empty lines
+      if (!trimmed) {
+        result.push('');
+        continue;
+      }
 
-    // Decrease depth before closing tag
-    if (isClosingTag) {
-      depth = Math.max(0, depth - 1);
-    }
+      // Standalone closing tag - decrease depth first
+      if (isStandaloneCloseTag) {
+        xmlDepth = Math.max(0, xmlDepth - 1);
+        const indent = '\u00A0\u00A0'.repeat(xmlDepth);
+        result.push(indent + trimmed);
+        continue;
+      }
 
-    // Add indentation using non-breaking spaces to avoid markdown code block interpretation
-    const indent = '\u00A0\u00A0'.repeat(depth);
-    result.push(indent + trimmed);
+      // Standalone opening tag
+      if (isStandaloneOpenTag) {
+        const indent = '\u00A0\u00A0'.repeat(xmlDepth);
+        result.push(indent + trimmed);
+        xmlDepth++;
+        continue;
+      }
 
-    // Increase depth after opening tag
-    if (isOpeningTag) {
-      depth++;
+      // Content inside XML tags - use current depth
+      const indent = '\u00A0\u00A0'.repeat(xmlDepth);
+      result.push(indent + trimmed);
+    } else {
+      // Outside XML blocks, preserve original line
+      result.push(line);
     }
   }
 
@@ -45,8 +65,8 @@ function addXmlIndentation(text: string): string {
 }
 
 export function MarkdownRenderer({ content, className }: MarkdownRendererProps) {
-  // Add XML indentation first, then escape tags
-  let processedContent = addXmlIndentation(content);
+  // Normalize XML content indentation, then escape tags
+  let processedContent = normalizeXmlContent(content);
   processedContent = processedContent.replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
   const components: Components = {

@@ -17,7 +17,7 @@ export interface UpdateState {
 }
 
 export const UNSUPPORTED_AUTO_UPDATE_MESSAGE =
-  "Automatic updates are only enabled for packaged macOS builds.";
+  "Automatic updates are only enabled for packaged macOS and Windows builds.";
 
 export const createDefaultUpdateState = (
   currentVersion = "",
