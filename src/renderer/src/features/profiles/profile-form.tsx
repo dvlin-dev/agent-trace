@@ -39,6 +39,35 @@ function getDefaultName(providerId: ProviderId): string {
   return `${providerId}-dev`;
 }
 
+const MIN_PROFILE_PORT = 1024;
+const MAX_PROFILE_PORT = 65535;
+
+function buildUsedPortSet(profiles: ConnectionProfile[]): Set<number> {
+  return new Set(profiles.map((profile) => profile.localPort));
+}
+
+function pickAvailablePort(
+  usedPorts: Set<number>,
+  preferredPort = DEFAULT_PROFILE_PORT_START,
+): number {
+  if (!usedPorts.has(preferredPort)) {
+    return preferredPort;
+  }
+
+  const availablePorts: number[] = [];
+  for (let port = MIN_PROFILE_PORT; port <= MAX_PROFILE_PORT; port += 1) {
+    if (!usedPorts.has(port)) {
+      availablePorts.push(port);
+    }
+  }
+
+  if (availablePorts.length === 0) {
+    return preferredPort;
+  }
+
+  return availablePorts[Math.floor(Math.random() * availablePorts.length)]!;
+}
+
 export interface ProfileFormProps {
   onSubmit: (profile: ConnectionProfile) => Promise<void>;
   initialProfile?: ConnectionProfile | null;
@@ -51,16 +80,18 @@ export function ProfileForm({
   submitLabel = "Save profile",
 }: ProfileFormProps) {
   const initialProvider = initialProfile?.providerId ?? "anthropic";
+  const profiles = useProfileStore((s) => s.profiles);
   const [providerId, setProviderId] = useState<ProviderId>(initialProvider);
   const [name, setName] = useState(initialProfile?.name ?? getDefaultName(initialProvider));
   const [upstreamBaseUrl, setUpstreamBaseUrl] = useState(
     initialProfile?.upstreamBaseUrl ?? getProviderOption(initialProvider).defaultUpstreamBaseUrl,
   );
-  const [localPort, setLocalPort] = useState(initialProfile?.localPort ?? DEFAULT_PROFILE_PORT_START);
+  const [localPort, setLocalPort] = useState(
+    () => initialProfile?.localPort ?? pickAvailablePort(buildUsedPortSet(profiles)),
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const profiles = useProfileStore((s) => s.profiles);
   const portConflict = profiles.some(
     (p) => p.localPort === localPort && p.id !== initialProfile?.id,
   );
@@ -87,6 +118,17 @@ export function ProfileForm({
       });
     }
   }, [initialProfile, providerId]);
+
+  useEffect(() => {
+    if (initialProfile) {
+      return;
+    }
+
+    const usedPorts = buildUsedPortSet(profiles);
+    setLocalPort((current) =>
+      usedPorts.has(current) ? pickAvailablePort(usedPorts, current) : current,
+    );
+  }, [initialProfile, profiles]);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
