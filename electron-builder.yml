@@ -34,7 +34,7 @@ dmg:
       type: link
       path: /Applications
 win:
-  icon: resources/icon.ico
+  icon: resources/icon.png
   artifactName: Agent-Trace-${version}-${arch}.${ext}
   target:
     - nsis
